@@ -100,7 +100,7 @@ public class HRPanel extends JPanel {
 
         JButton addBtn = UITheme.createButton("Add");
         JButton editBtn = UITheme.createButton("Edit");
-        JButton deleteBtn = UITheme.createAccentButton("Delete");
+        JButton deleteBtn = UITheme.createCrudDangerButton("Delete");   
 
         addBtn.setPreferredSize(new Dimension(90,32));
         editBtn.setPreferredSize(new Dimension(90,32));

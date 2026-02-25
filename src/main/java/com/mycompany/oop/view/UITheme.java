@@ -92,13 +92,52 @@ public class UITheme {
         JButton btn = new JButton(text);
 
         btn.setFont(new Font("Tahoma", Font.BOLD, 13));
+        btn.setHorizontalAlignment(SwingConstants.CENTER);
         btn.setFocusPainted(false);
 
-        btn.setBackground(new Color(60,80,170));
-        btn.setForeground(Color.WHITE);
+        btn.setBackground(new Color(230,230,230));
+        btn.setForeground(new Color(40,40,40));
 
-        btn.setMargin(new Insets(6,14,6,14));
-        btn.setBorder(createSoftRaisedBorder());
+        btn.setMargin(new Insets(8,16,8,16));
+
+        // Default Border
+        Border defaultBorder = BorderFactory.createCompoundBorder(
+                createSoftRaisedBorder(),
+                BorderFactory.createEmptyBorder(0, 15, 0, 15)
+        );
+
+        btn.setBorder(defaultBorder);
+
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+
+                btn.setBackground(new Color(210,220,250));
+                btn.setForeground(new Color(30,50,130));
+
+                Border hoverBorder = BorderFactory.createCompoundBorder(
+                        BorderFactory.createBevelBorder(
+                                BevelBorder.RAISED,
+                                new Color(220,230,255),
+                                new Color(200,210,240),
+                                new Color(120,140,200),
+                                new Color(90,110,170)
+                        ),
+                        BorderFactory.createEmptyBorder(0, 15, 0, 15)
+                );
+
+                btn.setBorder(hoverBorder);
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+
+                btn.setBackground(new Color(230,230,230));
+                btn.setForeground(new Color(40,40,40));
+                btn.setBorder(defaultBorder);
+            }
+        });
 
         return btn;
     }
@@ -114,20 +153,76 @@ public class UITheme {
 
         JButton btn = new JButton(text);
 
-        btn.setFont(new Font("Tahoma", Font.PLAIN, 13));
+        btn.setFont(new Font("Tahoma", Font.PLAIN, 12)); // smaller font
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setFocusPainted(false);
 
         btn.setBackground(new Color(215,215,215));
         btn.setForeground(Color.BLACK);
 
-        btn.setMargin(new Insets(6,14,6,14));
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE,40));
-        btn.setBorder(createSoftRaisedBorder());
+        btn.setMargin(new Insets(8,16,8,16));
+
+        btn.setPreferredSize(new Dimension(220,45));
+        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE,45));
+
+        btn.setBorder(createSoftRaisedBorder()); // same bevel
 
         return btn;
     }
 
+
+    /*
+   ============================================================
+   SIDEBAR DANGER BUTTON
+   Used for Logout.
+   ============================================================
+  */
+    public static JButton createSidebarDangerButton(String text){
+
+        JButton btn = new JButton(text);
+
+        btn.setFont(new Font("Tahoma", Font.PLAIN, 12)); // not bold
+        btn.setHorizontalAlignment(SwingConstants.LEFT);
+        btn.setFocusPainted(false);
+
+        btn.setBackground(new Color(225,225,225));
+        btn.setForeground(new Color(60,60,60));
+
+        btn.setMargin(new Insets(10,35,10,16));
+        btn.setPreferredSize(new Dimension(220,45));
+        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE,45));
+
+        Border defaultBorder = createSoftRaisedBorder();
+        btn.setBorder(defaultBorder);
+
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+
+                btn.setBackground(new Color(240,210,210)); // soft red
+                btn.setForeground(new Color(120,40,40));
+
+                btn.setBorder(BorderFactory.createBevelBorder(
+                        BevelBorder.RAISED,
+                        new Color(255,230,230),
+                        new Color(235,190,190),
+                        new Color(190,110,110),
+                        new Color(160,80,80)
+                ));
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+
+                btn.setBackground(new Color(225,225,225));
+                btn.setForeground(new Color(60,60,60));
+                btn.setBorder(defaultBorder);
+            }
+        });
+
+        return btn;
+    }
 
     /*
      ============================================================
@@ -135,24 +230,51 @@ public class UITheme {
      Used for Logout.
      ============================================================
     */
-    public static JButton createSidebarDangerButton(String text){
+    public static JButton createCrudDangerButton(String text){
 
         JButton btn = new JButton(text);
 
         btn.setFont(new Font("Tahoma", Font.PLAIN, 13));
-        btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setFocusPainted(false);
 
-        btn.setBackground(new Color(190,70,70));
-        btn.setForeground(Color.WHITE);
+        // Default (same as Add/Edit)
+        btn.setBackground(new Color(215,215,215));
+        btn.setForeground(Color.BLACK);
 
         btn.setMargin(new Insets(6,14,6,14));
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE,40));
+        btn.setPreferredSize(new Dimension(85, 30));
+
         btn.setBorder(createSoftRaisedBorder());
+
+        // Subtle red hover (lighter than logout)
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+
+                btn.setBackground(new Color(245,215,215)); // softer red
+                btn.setForeground(new Color(120,40,40));
+
+                btn.setBorder(BorderFactory.createBevelBorder(
+                        BevelBorder.RAISED,
+                        new Color(255,230,230),
+                        new Color(240,190,190),
+                        new Color(200,120,120),
+                        new Color(170,90,90)
+                ));
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+
+                btn.setBackground(new Color(215,215,215));
+                btn.setForeground(Color.BLACK);
+                btn.setBorder(createSoftRaisedBorder());
+            }
+        });
 
         return btn;
     }
-
 
     /*
      ============================================================
@@ -208,5 +330,29 @@ public class UITheme {
 
         return panel;
     }
+    
+    /*
+     ============================================================
+     ADD EMPLOYEE CANCEL AND SAVE BUTTONS
+     
+     ============================================================
+    */
+    
+    public static JButton createFormButton(String text){
+
+    JButton btn = new JButton(text);
+
+    btn.setFont(new Font("Tahoma", Font.PLAIN, 13));
+    btn.setFocusPainted(false);
+
+    btn.setBackground(new Color(215,215,215));
+    btn.setForeground(Color.BLACK);
+
+    btn.setMargin(new Insets(6,14,6,14));
+    btn.setHorizontalAlignment(SwingConstants.CENTER);
+    btn.setBorder(createSoftRaisedBorder());
+
+    return btn;
+}
 
 }

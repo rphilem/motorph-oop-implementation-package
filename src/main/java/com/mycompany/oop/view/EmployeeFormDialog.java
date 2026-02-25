@@ -33,8 +33,6 @@ public class EmployeeFormDialog extends JDialog {
         this.existingEmployee = employee;
 
         setTitle(employee == null ? "Add Employee" : "Edit Employee");
-        setSize(500, 600);
-        setLocationRelativeTo(parent);
         setLayout(new BorderLayout());
         getContentPane().setBackground(UITheme.MAIN_GRAY);
 
@@ -42,9 +40,10 @@ public class EmployeeFormDialog extends JDialog {
 
         JPanel content = UITheme.createInsetPanel();
         content.setLayout(new BorderLayout());
-        content.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+        content.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
 
-        JPanel formPanel = new JPanel(new GridLayout(0,2,10,10));
+        // ===== FORM PANEL (compact spacing) =====
+        JPanel formPanel = new JPanel(new GridLayout(0,2,8,6));
         formPanel.setBackground(Color.WHITE);
 
         idField = createField("Employee ID:", formPanel);
@@ -57,6 +56,7 @@ public class EmployeeFormDialog extends JDialog {
         hourlyRateField = createField("Hourly Rate:", formPanel);
 
         if (isAdmin) {
+
             usernameField = createField("Username:", formPanel);
 
             formPanel.add(createLabel("Password:"));
@@ -68,17 +68,22 @@ public class EmployeeFormDialog extends JDialog {
             roleBox = new JComboBox<>(new String[]{
                     "Admin","HR","Finance","Employee","IT"
             });
+            roleBox.setFont(new Font("Tahoma", Font.PLAIN, 12));
             roleBox.setBorder(BorderFactory.createLoweredBevelBorder());
             formPanel.add(roleBox);
         }
 
         content.add(formPanel, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel();
+        // ===== BUTTON PANEL (clean + compact) =====
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 5));
         buttonPanel.setBackground(UITheme.MAIN_GRAY);
 
-        JButton cancelBtn = UITheme.createButton("Cancel");
-        JButton saveBtn = UITheme.createAccentButton("Save");
+        JButton cancelBtn = UITheme.createFormButton("Cancel");
+        JButton saveBtn = UITheme.createFormButton("Save");
+
+        cancelBtn.setPreferredSize(new Dimension(85, 30));
+        saveBtn.setPreferredSize(new Dimension(85, 30));
 
         cancelBtn.addActionListener(e -> dispose());
         saveBtn.addActionListener(e -> saveEmployee());
@@ -94,6 +99,8 @@ public class EmployeeFormDialog extends JDialog {
             populateFields(employee);
         }
 
+        pack(); // auto-size nicely
+        setLocationRelativeTo(parent);
     }
 
     // ================= FIELD BUILDER =================
@@ -115,6 +122,7 @@ public class EmployeeFormDialog extends JDialog {
     }
 
     private void styleField(JTextField field){
+        field.setPreferredSize(new Dimension(180, 28));
         field.setBorder(BorderFactory.createLoweredBevelBorder());
         field.setBackground(Color.WHITE);
         field.setFont(new Font("Tahoma", Font.PLAIN, 12));

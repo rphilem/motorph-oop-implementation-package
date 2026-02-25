@@ -27,7 +27,7 @@ public class MainAppFrame extends JFrame {
         getRootPane().setDefaultButton(null);
 
         // ===== TOP TITLE BAR =====
-        add(UITheme.createTitleBar("MotorPH Payroll Management System"),
+        add(UITheme.createTitleBar("MotorPH Payroll System"),
                 BorderLayout.NORTH);
 
         // ===== SIDEBAR =====
