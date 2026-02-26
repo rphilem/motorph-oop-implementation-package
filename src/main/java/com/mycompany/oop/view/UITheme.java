@@ -172,11 +172,11 @@ public class UITheme {
 
 
     /*
-   ============================================================
-   SIDEBAR DANGER BUTTON
-   Used for Logout.
-   ============================================================
-  */
+     ============================================================
+     SIDEBAR DANGER BUTTON
+     Used for Logout.
+     ============================================================
+    */
     public static JButton createSidebarDangerButton(String text){
 
         JButton btn = new JButton(text);

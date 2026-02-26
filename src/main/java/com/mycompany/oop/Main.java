@@ -36,3 +36,14 @@ public class Main {
 //int is a data type that stores whole number (e.g int employeeId, int hoursWorked)
 
 
+/*
+CURRENT VERSION
+• Repository Pattern
+• Service Layer Pattern
+• Template Method Pattern
+• Polymorphism-ready Employee hierarchy
+• Cutoff-based payroll cycle
+• Duplicate prevention
+• Demo reset support
+• HR view + Employee self-service
+*/

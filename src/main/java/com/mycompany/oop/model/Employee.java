@@ -217,3 +217,33 @@ public abstract class Employee implements Payables {
 // 3. Polymorphism
 // Static (compile-time polymorphism) or method Overloading
 // Dynamic (runtime polymorphism or method Overriding
+
+/*
+EMPLOYEE – ABSTRACT TEMPLATE UPDATE SUMMARY
+
+Purpose:
+Acts as payroll template using Template Method Pattern.
+
+Key Structure:
+Abstract computeGrossSalary()
+Abstract computeDeductions()
+Concrete computeNetSalary()
+
+Enhancements:
+Centralized net salary logic
+Validation in setters
+Supports polymorphic payroll computation
+
+Why Important:
+Allows future employee types:
+Contractual
+Part-time
+Probationary
+To override salary logic differently.
+
+Design Pattern:
+Template Method + Polymorphism
+
+Scalability:
+PayrollProcessor can adapt per subclass behavior automatically.
+*/

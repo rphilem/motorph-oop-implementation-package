@@ -53,32 +53,37 @@ public class MainAppFrame extends JFrame {
 
         // ===== NAVIGATION BUTTONS =====
 
-        buttonPanel.add(createSidebarButton("Dashboard","DASH"));
-        buttonPanel.add(Box.createVerticalStrut(10));
-
         String role = employee.getRole();
 
         if(role.equals("Admin")){
+
             addNavButton(buttonPanel,"Employees","EMP");
-            addNavButton(buttonPanel,"Payroll","PAYROLL");
-            addNavButton(buttonPanel,"Leave Review","LEAVE");
+            addNavButton(buttonPanel,"User Management","IT");
         }
 
         if(role.equals("HR")){
+
             addNavButton(buttonPanel,"Employees","EMP");
+            addNavButton(buttonPanel,"Payroll","PAYROLL");
+            addNavButton(buttonPanel,"Payroll History","PAYROLL_HISTORY");
             addNavButton(buttonPanel,"Leave Review","LEAVE");
         }
 
         if(role.equals("Finance")){
+
             addNavButton(buttonPanel,"Payroll","PAYROLL");
+            addNavButton(buttonPanel,"Payroll History","PAYROLL_HISTORY");
         }
 
         if(role.equals("Employee")){
+
             addNavButton(buttonPanel,"My Profile","PROFILE");
+            addNavButton(buttonPanel,"Payslip","PAYSLIP");
             addNavButton(buttonPanel,"File Leave","FILE");
         }
 
         if(role.equals("IT")){
+
             addNavButton(buttonPanel,"User Management","IT");
         }
 
@@ -107,10 +112,12 @@ public class MainAppFrame extends JFrame {
         contentPanel.add(new DashboardPanel(employee),"DASH");
         contentPanel.add(new HRPanel(),"EMP");
         contentPanel.add(new PayrollPanel(),"PAYROLL");
+        contentPanel.add(new PayslipPanel(employee),"PAYSLIP");     
         contentPanel.add(new LeavePanel(employee),"FILE");
         contentPanel.add(new LeaveReviewPanel(),"LEAVE");
         contentPanel.add(new EmployeePanel(employee),"PROFILE");
         contentPanel.add(new ITPanel(),"IT");
+        contentPanel.add(new HRPayrollHistoryPanel(),"PAYROLL_HISTORY");
 
         add(contentPanel,BorderLayout.CENTER);
 
