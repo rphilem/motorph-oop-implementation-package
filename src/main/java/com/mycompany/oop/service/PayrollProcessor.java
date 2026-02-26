@@ -13,7 +13,7 @@ public class PayrollProcessor {
 
         PayrollRecord record = new PayrollRecord(emp, hoursWorked);
 
-        // 1️⃣ Compute Gross (cutoff-based)
+        // Compute Gross (cutoff-based)
 
         double gross;
 
@@ -30,7 +30,8 @@ public class PayrollProcessor {
         // Convert to monthly for deduction computation only
         double monthlyEquivalent = gross * 2;
 
-        // 2️⃣ Compute MONTHLY deductions
+        // Compute MONTHLY deductions
+
 
         double sss;
         if (monthlyEquivalent <= 3250) sss = 135;
@@ -61,7 +62,7 @@ public class PayrollProcessor {
         else
             tax = 40833.33 + (monthlyEquivalent - 166667) * 0.32;
 
-        // 3️⃣ Convert everything to cutoff amounts
+        // Convert everything to cutoff amounts
 
         double cutoffSss = sss / 2;
         double cutoffPhilhealth = philhealth / 2;
@@ -74,7 +75,7 @@ public class PayrollProcessor {
                 cutoffPagibig +
                 cutoffTax;
 
-        // 4️⃣ Store cutoff values only
+        // Store cutoff values only
 
         record.setSss(cutoffSss);
         record.setPhilhealth(cutoffPhilhealth);
@@ -92,33 +93,45 @@ public class PayrollProcessor {
 PAYROLL PROCESSOR – COMPUTATION ENGINE UPDATE SUMMARY
 
 Purpose:
-Handles payroll computation logic per employee.
+Handles payroll computation logic per employee
+for a specific payroll cutoff period.
 
-Responsibilities:
-Compute gross pay
-Compute SSS, PhilHealth, Pag-IBIG, Tax
-Return PayrollRecord object containing breakdown
+Core Responsibility:
+• Compute cutoff-based gross pay
+• Convert cutoff gross to monthly equivalent for deduction bracket evaluation
+• Compute government deductions (SSS, PhilHealth, Pag-IBIG, Withholding Tax)
+• Convert deductions back to cutoff values
+• Return a PayrollRecord object containing full breakdown
 
-Enhancements:
-Converted government deductions from UI logic
-into backend processor logic
-Structured return as PayrollRecord object
-instead of mutating Employee object
-Clean separation of computation and persistence
+Major Correction (Computation Consistency Fix):
+• Standardized all stored deduction values as CUTOFF-based amounts
+• Removed mismatch between monthly deduction display and semi-monthly totals
+• Ensured:
+      Net Salary = Gross (cutoff) - Total Deductions (cutoff)
+• Allowance is treated consistently as monthly and divided per cutoff
+• Eliminated rounding inconsistencies caused by mixed storage logic
+
+Architectural Improvement:
+• Government deduction logic fully moved to backend
+• UI no longer performs any payroll computation
+• PayrollRecord encapsulates breakdown data cleanly
+• Employee model remains immutable and payroll-agnostic
 
 Why This Matters:
-Keeps Employee model clean
-Makes payroll computation testable
-Allows easy policy changes (tax updates)
-
-Scalability:
-Future upgrade paths:
-Official SSS table integration
-Tax table updates
-Configurable deduction rates
-Attendance-based hourly calculation
+• Prevents mismatch between displayed breakdown and computed totals
+• Ensures payslip integrity
+• Makes payroll logic auditable and predictable
+• Enables proper approval workflow without recalculation risk
 
 Design Principle:
-Stateless processing component.
-No data storage inside processor.
+Stateless computation engine.
+No internal data persistence.
+Pure input (Employee + hoursWorked) → deterministic PayrollRecord output.
+
+Scalability Roadmap:
+• Replace simplified SSS logic with official contribution table
+• Externalize tax brackets to configuration file
+• Dynamic PhilHealth rate update support
+• Per-employee attendance-based computation
+• Future payroll policy versioning system
 */
