@@ -13,25 +13,36 @@ public class PayrollProcessor {
 
         PayrollRecord record = new PayrollRecord(emp, hoursWorked);
 
-        // Compute Gross (cutoff-based)
-
         double gross;
+        double basicHalf;
+        double allowanceHalf;
+
+        // ================= GROSS COMPUTATION =================
 
         if (emp.getHourlyRate() > 0) {
+
             gross = hoursWorked * emp.getHourlyRate();
+
+            basicHalf = gross;
+            allowanceHalf = 0;
+
         } else {
-            // Assume both basicSalary and allowance are MONTHLY
-            gross = (emp.getBasicSalary() / 2) +
-                    (emp.getAllowance() / 2);
+
+            basicHalf = emp.getBasicSalary() / 2;
+            allowanceHalf = emp.getAllowance() / 2;
+
+            gross = basicHalf + allowanceHalf;
         }
 
+        record.setBasicComponent(basicHalf);
+        record.setAllowanceComponent(allowanceHalf);
         record.setGross(gross);
 
-        // Convert to monthly for deduction computation only
+        // ================= MONTHLY CONVERSION =================
+
         double monthlyEquivalent = gross * 2;
 
-        // Compute MONTHLY deductions
-
+        // ================= GOVERNMENT DEDUCTIONS (MONTHLY) =================
 
         double sss;
         if (monthlyEquivalent <= 3250) sss = 135;
@@ -62,7 +73,7 @@ public class PayrollProcessor {
         else
             tax = 40833.33 + (monthlyEquivalent - 166667) * 0.32;
 
-        // Convert everything to cutoff amounts
+        // ================= CONVERT TO SEMI-MONTHLY =================
 
         double cutoffSss = sss / 2;
         double cutoffPhilhealth = philhealth / 2;
@@ -74,8 +85,6 @@ public class PayrollProcessor {
                 cutoffPhilhealth +
                 cutoffPagibig +
                 cutoffTax;
-
-        // Store cutoff values only
 
         record.setSss(cutoffSss);
         record.setPhilhealth(cutoffPhilhealth);

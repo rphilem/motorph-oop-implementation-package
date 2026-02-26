@@ -109,17 +109,19 @@ public class PayrollService {
                     processor.processPayroll(e, hoursWorked);
 
             PayrollHistoryRecord history =
-                    new PayrollHistoryRecord(
-                            e.getEmployeeId(),
-                            cutoffPeriod,
-                            record.getGross(),
-                            record.getSss(),
-                            record.getPhilhealth(),
-                            record.getPagibig(),
-                            record.getTax(),
-                            record.getTotalDeductions(),
-                            record.getNet()
-                    );
+                new PayrollHistoryRecord(
+                    e.getEmployeeId(),
+                    cutoffPeriod,
+                    record.getBasicComponent(),
+                    record.getAllowanceComponent(),
+                    record.getGross(),
+                    record.getSss(),
+                    record.getPhilhealth(),
+                    record.getPagibig(),
+                    record.getTax(),
+                    record.getTotalDeductions(),
+                    record.getNet()
+                );
 
             historyRepository.savePayrollRecord(history);
         }

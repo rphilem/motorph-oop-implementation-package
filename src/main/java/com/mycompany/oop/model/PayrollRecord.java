@@ -16,6 +16,9 @@ public class PayrollRecord {
     private double tax;
     private double totalDeductions;
     private double net;
+    
+    private double basicComponent;
+    private double allowanceComponent;
 
     public PayrollRecord(Employee employee, double hoursWorked) {
         this.employee = employee;
@@ -45,4 +48,16 @@ public class PayrollRecord {
 
     public double getNet() { return net; }
     public void setNet(double net) { this.net = net; }
+    
+    public double getBasicComponent() {
+        return basicComponent; }   
+    
+    public void setBasicComponent(double basicComponent) {
+        this.basicComponent = basicComponent; }
+
+    public double getAllowanceComponent() {
+        return allowanceComponent; }
+
+    public void setAllowanceComponent(double allowanceComponent) {
+        this.allowanceComponent = allowanceComponent; }
 }

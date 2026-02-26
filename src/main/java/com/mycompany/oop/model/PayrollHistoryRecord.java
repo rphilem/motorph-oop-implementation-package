@@ -15,11 +15,15 @@ public class PayrollHistoryRecord {
     private double pagibig;
     private double tax;
     private double totalDeductions;
-    private double net;
+    private double net;   
+    private double basicComponent;
+    private double allowanceComponent;
 
     public PayrollHistoryRecord(
             int employeeId,
             String cutoffPeriod,
+            double basicComponent,
+            double allowanceComponent,
             double gross,
             double sss,
             double philhealth,
@@ -30,6 +34,8 @@ public class PayrollHistoryRecord {
     ) {
         this.employeeId = employeeId;
         this.cutoffPeriod = cutoffPeriod;
+        this.basicComponent = basicComponent;
+        this.allowanceComponent = allowanceComponent;
         this.gross = gross;
         this.sss = sss;
         this.philhealth = philhealth;
@@ -74,4 +80,13 @@ public class PayrollHistoryRecord {
     public double getNet() {
         return net;
     }
+    
+    public double getBasicComponent() { 
+        return basicComponent; 
+    
+    }
+    public double getAllowanceComponent() { 
+        return allowanceComponent; 
+    }
+    
 }

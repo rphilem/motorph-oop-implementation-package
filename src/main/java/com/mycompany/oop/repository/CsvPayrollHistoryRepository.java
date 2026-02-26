@@ -37,23 +37,27 @@ public class CsvPayrollHistoryRepository implements PayrollHistoryRepository {
         try (BufferedWriter writer =
                      new BufferedWriter(new FileWriter(FILE_PATH, true))) {
 
-            writer.write(
-                    record.getEmployeeId() + "," +
-                    record.getCutoffPeriod() + "," +
-                    record.getGross() + "," +
-                    record.getSss() + "," +
-                    record.getPhilhealth() + "," +
-                    record.getPagibig() + "," +
-                    record.getTax() + "," +
-                    record.getTotalDeductions() + "," +
-                    record.getNet()
-            );
+        writer.write(
+                record.getEmployeeId() + "," +
+                record.getCutoffPeriod() + "," +
 
+                record.getBasicComponent() + "," +
+                record.getAllowanceComponent() + "," +
+
+                record.getGross() + "," +
+                record.getSss() + "," +
+                record.getPhilhealth() + "," +
+                record.getPagibig() + "," +
+                record.getTax() + "," +
+                record.getTotalDeductions() + "," +
+                record.getNet()
+        );
             writer.newLine();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+        
     }
 
     /*
@@ -80,17 +84,21 @@ public class CsvPayrollHistoryRepository implements PayrollHistoryRepository {
                 String[] data = line.split(",");
 
                 PayrollHistoryRecord record =
-                        new PayrollHistoryRecord(
-                                Integer.parseInt(data[0].trim()),
-                                data[1].trim(),
-                                Double.parseDouble(data[2].trim()),
-                                Double.parseDouble(data[3].trim()),
-                                Double.parseDouble(data[4].trim()),
-                                Double.parseDouble(data[5].trim()),
-                                Double.parseDouble(data[6].trim()),
-                                Double.parseDouble(data[7].trim()),
-                                Double.parseDouble(data[8].trim())
-                        );
+                    new PayrollHistoryRecord(
+                            Integer.parseInt(data[0].trim()),  // employeeId
+                            data[1].trim(),                    // cutoffPeriod
+
+                            Double.parseDouble(data[2].trim()), // basicComponent
+                            Double.parseDouble(data[3].trim()), // allowanceComponent
+
+                            Double.parseDouble(data[4].trim()), // gross
+                            Double.parseDouble(data[5].trim()), // sss
+                            Double.parseDouble(data[6].trim()), // philhealth
+                            Double.parseDouble(data[7].trim()), // pagibig
+                            Double.parseDouble(data[8].trim()), // tax
+                            Double.parseDouble(data[9].trim()), // totalDeductions
+                            Double.parseDouble(data[10].trim()) // net
+                    );
 
                 records.add(record);
             }
