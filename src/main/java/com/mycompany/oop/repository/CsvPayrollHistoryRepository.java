@@ -21,86 +21,79 @@ import java.util.List;
     - Load all records
     - Filter by employee
     - Check cutoff duplicates
-    - Delete by cutoff (for demo reset)
+    - Delete by cutoff
 */
 
 public class CsvPayrollHistoryRepository implements PayrollHistoryRepository {
 
-    private static final String FILE_PATH = "payroll_history.csv";
+    private static final String FILE_PATH = "src/main/resources/payroll_history.csv";
 
-    /*
-        Save a payroll record (append mode)
-    */
     @Override
     public void savePayrollRecord(PayrollHistoryRecord record) {
 
-        try (BufferedWriter writer =
-                     new BufferedWriter(new FileWriter(FILE_PATH, true))) {
+        try {
+            File file = new File(FILE_PATH);
+            boolean needsNewLine = file.exists() && file.length() > 0;
 
-        writer.write(
-                record.getEmployeeId() + "," +
-                record.getCutoffPeriod() + "," +
-
-                record.getBasicComponent() + "," +
-                record.getAllowanceComponent() + "," +
-
-                record.getGross() + "," +
-                record.getSss() + "," +
-                record.getPhilhealth() + "," +
-                record.getPagibig() + "," +
-                record.getTax() + "," +
-                record.getTotalDeductions() + "," +
-                record.getNet()
-        );
-            writer.newLine();
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
+                if (needsNewLine) {
+                    writer.newLine();
+                }
+                writer.write(formatRecord(record));
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
     }
 
-    /*
-        Load all payroll history records
-    */
     @Override
     public List<PayrollHistoryRecord> findAll() {
 
         List<PayrollHistoryRecord> records = new ArrayList<>();
-
         File file = new File(FILE_PATH);
 
         if (!file.exists()) {
-            return records; // return empty if no file yet
+            return records;
         }
 
-        try (BufferedReader reader =
-                     new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 
             String line;
 
             while ((line = reader.readLine()) != null) {
 
-                String[] data = line.split(",");
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
 
-                PayrollHistoryRecord record =
-                    new PayrollHistoryRecord(
-                            Integer.parseInt(data[0].trim()),  // employeeId
-                            data[1].trim(),                    // cutoffPeriod
+                String[] data = line.split(",", -1);
 
-                            Double.parseDouble(data[2].trim()), // basicComponent
-                            Double.parseDouble(data[3].trim()), // allowanceComponent
+                if (data.length < 11) {
+                    System.out.println("Skipped invalid payroll history row: " + line);
+                    continue;
+                }
 
-                            Double.parseDouble(data[4].trim()), // gross
-                            Double.parseDouble(data[5].trim()), // sss
-                            Double.parseDouble(data[6].trim()), // philhealth
-                            Double.parseDouble(data[7].trim()), // pagibig
-                            Double.parseDouble(data[8].trim()), // tax
-                            Double.parseDouble(data[9].trim()), // totalDeductions
-                            Double.parseDouble(data[10].trim()) // net
+                try {
+                    PayrollHistoryRecord record = new PayrollHistoryRecord(
+                            Integer.parseInt(data[0].trim()),
+                            data[1].trim(),
+                            Double.parseDouble(data[2].trim()),
+                            Double.parseDouble(data[3].trim()),
+                            Double.parseDouble(data[4].trim()),
+                            Double.parseDouble(data[5].trim()),
+                            Double.parseDouble(data[6].trim()),
+                            Double.parseDouble(data[7].trim()),
+                            Double.parseDouble(data[8].trim()),
+                            Double.parseDouble(data[9].trim()),
+                            Double.parseDouble(data[10].trim())
                     );
 
-                records.add(record);
+                    records.add(record);
+
+                } catch (NumberFormatException ex) {
+                    System.out.println("Skipped malformed payroll history row: " + line);
+                }
             }
 
         } catch (IOException e) {
@@ -110,9 +103,6 @@ public class CsvPayrollHistoryRepository implements PayrollHistoryRepository {
         return records;
     }
 
-    /*
-        Filter payroll history by employee
-    */
     @Override
     public List<PayrollHistoryRecord> findByEmployeeId(int employeeId) {
 
@@ -127,15 +117,11 @@ public class CsvPayrollHistoryRepository implements PayrollHistoryRepository {
         return filtered;
     }
 
-    /*
-        Check if cutoff already exists
-    */
     @Override
     public boolean existsByCutoff(String cutoffPeriod) {
 
         for (PayrollHistoryRecord record : findAll()) {
-            if (record.getCutoffPeriod()
-                    .equalsIgnoreCase(cutoffPeriod)) {
+            if (record.getCutoffPeriod().equalsIgnoreCase(cutoffPeriod)) {
                 return true;
             }
         }
@@ -143,77 +129,83 @@ public class CsvPayrollHistoryRepository implements PayrollHistoryRepository {
         return false;
     }
 
-    /*
-        Delete all records of a specific cutoff
-        Used for demo reset or overwrite logic
-    */
     @Override
     public void deleteByCutoff(String cutoffPeriod) {
 
         List<PayrollHistoryRecord> updated = new ArrayList<>();
 
         for (PayrollHistoryRecord record : findAll()) {
-            if (!record.getCutoffPeriod()
-                    .equalsIgnoreCase(cutoffPeriod)) {
+            if (!record.getCutoffPeriod().equalsIgnoreCase(cutoffPeriod)) {
                 updated.add(record);
             }
         }
 
-        try (PrintWriter writer =
-                     new PrintWriter(new FileWriter(FILE_PATH))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH))) {
 
-            for (PayrollHistoryRecord record : updated) {
-                writer.println(
-                        record.getEmployeeId() + "," +
-                        record.getCutoffPeriod() + "," +
-                        record.getGross() + "," +
-                        record.getSss() + "," +
-                        record.getPhilhealth() + "," +
-                        record.getPagibig() + "," +
-                        record.getTax() + "," +
-                        record.getTotalDeductions() + "," +
-                        record.getNet()
-                );
+            for (int i = 0; i < updated.size(); i++) {
+                writer.write(formatRecord(updated.get(i)));
+                if (i < updated.size() - 1) {
+                    writer.newLine();
+                }
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    private String formatRecord(PayrollHistoryRecord record) {
+        return record.getEmployeeId() + "," +
+                record.getCutoffPeriod() + "," +
+                record.getBasicComponent() + "," +
+                record.getAllowanceComponent() + "," +
+                record.getGross() + "," +
+                record.getSss() + "," +
+                record.getPhilhealth() + "," +
+                record.getPagibig() + "," +
+                record.getTax() + "," +
+                record.getTotalDeductions() + "," +
+                record.getNet();
+    }
 }
 
 /*
-CSV PAYROLL HISTORY REPOSITORY – IMPLEMENTATION UPDATE SUMMARY
+CSV PAYROLL HISTORY REPOSITORY – IMPLEMENTATION SUMMARY
 
 Purpose:
 Concrete implementation of PayrollHistoryRepository using CSV file storage.
 
 Key Responsibilities:
-Append payroll records
-Read all payroll records
-Filter by employee
-Detect duplicate cutoffs
-Delete cutoff records (demo overwrite)
+• Save payroll history records
+• Read all payroll history records
+• Filter payroll history by employee
+• Detect duplicate cutoff processing
+• Delete all records for a selected cutoff
 
 Important Fixes:
-Unified method names to match interface exactly
-Added safe file existence check
-Standardized CSV parsing logic
-Removed duplicate or inconsistent methods
-Centralized file path constant
+• Standardized save and delete operations to use the same full CSV structure
+• Added safe file existence check
+• Added safe CSV row validation
+• Added malformed row protection during parsing
+• Centralized row formatting through formatRecord()
+
+CSV Structure:
+employeeId,cutoffPeriod,basicComponent,allowanceComponent,gross,sss,philhealth,pagibig,tax,totalDeductions,net
 
 Duplicate Prevention:
-existsByCutoff() now scans all records and prevents re-processing
-the same cutoff unless overwrite is enabled.
+existsByCutoff() scans saved history and prevents processing
+the same cutoff more than once unless overwrite/reset is performed.
 
-Demo Reset Support:
-deleteByCutoff() rewrites the file without selected cutoff.
+Clear Cutoff Behavior:
+deleteByCutoff() rewrites payroll_history.csv excluding all rows
+that belong to the selected cutoff period.
 
 Design Pattern:
 Implements Repository Pattern.
-PayrollService depends on abstraction (interface),
-not concrete CSV implementation.
+PayrollService depends on the repository abstraction,
+not directly on file operations.
 
 Scalability:
-Can be replaced with a database without touching PayrollService.
+This repository can later be replaced by a database-backed implementation
+without changing PayrollService logic.
 */

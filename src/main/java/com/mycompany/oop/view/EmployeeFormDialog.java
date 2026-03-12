@@ -42,7 +42,6 @@ public class EmployeeFormDialog extends JDialog {
         content.setLayout(new BorderLayout());
         content.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
 
-        // ===== FORM PANEL (compact spacing) =====
         JPanel formPanel = new JPanel(new GridLayout(0,2,8,6));
         formPanel.setBackground(Color.WHITE);
 
@@ -66,7 +65,7 @@ public class EmployeeFormDialog extends JDialog {
 
             formPanel.add(createLabel("Role:"));
             roleBox = new JComboBox<>(new String[]{
-                    "Admin","HR","Finance","Employee","IT"
+                    "Admin", "HR", "Finance", "Employee", "IT"
             });
             roleBox.setFont(new Font("Tahoma", Font.PLAIN, 12));
             roleBox.setBorder(BorderFactory.createLoweredBevelBorder());
@@ -75,7 +74,6 @@ public class EmployeeFormDialog extends JDialog {
 
         content.add(formPanel, BorderLayout.CENTER);
 
-        // ===== BUTTON PANEL (clean + compact) =====
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 5));
         buttonPanel.setBackground(UITheme.MAIN_GRAY);
 
@@ -97,13 +95,16 @@ public class EmployeeFormDialog extends JDialog {
 
         if (employee != null) {
             populateFields(employee);
+
+            // Prevent editing employee ID during update
+            idField.setEditable(false);
+            idField.setBackground(new Color(230, 230, 230));
         }
 
-        pack(); // auto-size nicely
+        pack();
         setLocationRelativeTo(parent);
     }
 
-    // ================= FIELD BUILDER =================
     private JTextField createField(String labelText, JPanel panel) {
 
         panel.add(createLabel(labelText));
@@ -128,7 +129,6 @@ public class EmployeeFormDialog extends JDialog {
         field.setFont(new Font("Tahoma", Font.PLAIN, 12));
     }
 
-    // ================= POPULATE =================
     private void populateFields(Employee e) {
 
         idField.setText(String.valueOf(e.getEmployeeId()));
@@ -147,26 +147,96 @@ public class EmployeeFormDialog extends JDialog {
         }
     }
 
-    // ================= SAVE =================
     private void saveEmployee() {
+
+        if (idField.getText().trim().isEmpty()
+                || firstNameField.getText().trim().isEmpty()
+                || lastNameField.getText().trim().isEmpty()
+                || positionField.getText().trim().isEmpty()
+                || statusField.getText().trim().isEmpty()
+                || basicSalaryField.getText().trim().isEmpty()
+                || allowanceField.getText().trim().isEmpty()
+                || hourlyRateField.getText().trim().isEmpty()) {
+
+            JOptionPane.showMessageDialog(this,
+                    "Please fill in all required fields.",
+                    "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (isAdmin) {
+            if (usernameField.getText().trim().isEmpty()
+                    || new String(passwordField.getPassword()).trim().isEmpty()
+                    || roleBox.getSelectedItem() == null) {
+
+                JOptionPane.showMessageDialog(this,
+                        "Please complete username, password, and role.",
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
 
         try {
 
+            int employeeId = Integer.parseInt(idField.getText().trim());
+
+            if (existingEmployee == null && service.findById(employeeId) != null) {
+                JOptionPane.showMessageDialog(this,
+                        "Employee ID already exists.",
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            double basicSalary = Double.parseDouble(basicSalaryField.getText().trim());
+            double allowance = Double.parseDouble(allowanceField.getText().trim());
+            double hourlyRate = Double.parseDouble(hourlyRateField.getText().trim());
+
+            if (basicSalary < 0 || allowance < 0 || hourlyRate < 0) {
+                JOptionPane.showMessageDialog(this,
+                        "Salary values cannot be negative.",
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String username;
+            String password;
+            String role;
+
+            if (isAdmin) {
+                username = usernameField.getText().trim();
+                password = new String(passwordField.getPassword()).trim();
+                role = roleBox.getSelectedItem().toString();
+            } else if (existingEmployee != null) {
+                username = existingEmployee.getUsername();
+                password = existingEmployee.getPassword();
+                role = existingEmployee.getRole();
+            } else {
+                String first = firstNameField.getText().trim().toLowerCase().replace(" ", "");
+                String last = lastNameField.getText().trim().toLowerCase().replace(" ", "");
+
+                String lastInitial = last.isEmpty() ? "x" : String.valueOf(last.charAt(0));
+                username = first + "." + lastInitial;
+
+                password = "1234";
+                role = "Employee";
+            }
+
             Employee newEmployee = new RegularEmployee(
-                    Integer.parseInt(idField.getText()),
-                    firstNameField.getText(),
-                    lastNameField.getText(),
-                    positionField.getText(),
-                    statusField.getText(),
-                    Double.parseDouble(basicSalaryField.getText()),
-                    Double.parseDouble(allowanceField.getText()),
-                    Double.parseDouble(hourlyRateField.getText()),
-                    isAdmin ? usernameField.getText() :
-                            existingEmployee.getUsername(),
-                    isAdmin ? new String(passwordField.getPassword()) :
-                            existingEmployee.getPassword(),
-                    isAdmin ? roleBox.getSelectedItem().toString() :
-                            existingEmployee.getRole()
+                    employeeId,
+                    firstNameField.getText().trim(),
+                    lastNameField.getText().trim(),
+                    positionField.getText().trim(),
+                    statusField.getText().trim(),
+                    basicSalary,
+                    allowance,
+                    hourlyRate,
+                    username,
+                    password,
+                    role
             );
 
             if (existingEmployee == null) {
@@ -177,9 +247,15 @@ public class EmployeeFormDialog extends JDialog {
 
             dispose();
 
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Employee ID, Basic Salary, Allowance, and Hourly Rate must be valid numbers.",
+                    "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
+
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
-                    "Invalid input values",
+                    "Invalid input values.",
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         }

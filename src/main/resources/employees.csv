@@ -1,35 +1,36 @@
-employeeId,firstName,lastName,position,employmenStatus,basicSalary,allowance,hourlyRate,username,password,role
-10001,Manuel III,Garcia,Chief Executive Officer,Regular,90000,4500,536,manuel.g,1234,Admin
-10002,Antonio,Lim,Chief Operating Officer,Regular,60000,4500,357,antonio.l,1234,Admin
-10003,Bianca Sofia,Aquino,Chief Finance Officer,Regular,60000,4500,357,biancasofia.a,1234,Admin
-10004,Isabella,Reyes,Chief Marketing Officer,Regular,60000,4500,357,isabella.r,1234,Admin
-10005,Eduard,Hernandez,IT Operations and Systems,Regular,52670,3500,314,edward.h,1234,IT
-10006,Andrea Mae,Villanueva,HR Manager,Regular,52670,3500,314,andreamae.v,1234,HR
-10007,Brad ,San Jose,HR Team Leader,Regular,42975,3100,256,brad.sj,1234,HR
-10008,Alice,Romualdez,HR Rank and File,Regular,22500,2500,134,alice.r,1234,Employee
-10009,Rosie ,Atienza,HR Rank and File,Regular,22500,2500,134,rosie.a,1234,Employee
-10010,Roderick,Alvaro,Accounting Head,Regular,52670,3500,314,roderick.a,1234,Finance
-10011,Anthony,Salcedo,Payroll Manager,Regular,50825,3500,303,anthony.s,1234,Finance
-10012,Josie ,Lopez,Payroll Team Leader,Regular,38475,3100,229,josie.l,1234,Finance
-10013,Martha,Farala,Payroll Rank and File,Regular,24000,2500,143,martha.f,1234,Employee
-10014,Leila,Martinez,Payroll Rank and File,Regular,24000,2500,143,leila.m,1234,Employee
-10015,Fredrick ,Romualdez,Account Manager,Regular,53500,3500,318,frederick.r,1234,Employee
-10016,Christian,Mata,Account Team Leader,Regular,42975,3100,256,christian.m,1234,Employee
-10017,Selena ,De Leon,Account Team Leader,Regular,41850,3100,249,selena.dl,1234,Employee
-10018,Allison ,San Jose,Account Rank and File,Regular,22500,2500,134,allison.sj,1234,Employee
-10019,Cydney ,Rosario,Account Rank and File,Regular,22500,2500,134,cydney.r,1234,Employee
-10020,Mark ,Bautista,Account Rank and File,Regular,23250,2500,138,mark.b,1234,Employee
-10021,Darlene ,Lazaro,Account Rank and File,Probationary,23250,2500,138,darlene.l,1234,Employee
-10022,Kolby ,Delos Santos,Account Rank and File,Probationary,24000,2500,143,kolby.ds,1234,Employee
-10023,Vella ,Santos,Account Rank and File,Probationary,22500,2500,134,vella.s,1234,Employee
-10024,Tomas,Del Rosario,Account Rank and File,Probationary,22500,2500,134,tomas.dr,1234,Employee
-10025,Jacklyn ,Tolentino,Account Rank and File,Probationary,24000,2500,143,jacklyn.t,1234,Employee
-10026,Percival ,Gutierrez,Account Rank and File,Probationary,24750,2500,147,percival.g,1234,Employee
-10027,Garfield ,Manalaysay,Account Rank and File,Probationary,24750,2500,147,garfield.m,1234,Employee
-10028,Lizeth ,Villegas,Account Rank and File,Probationary,24000,2500,143,lizeth.v,1234,Employee
-10029,Carol ,Ramos,Account Rank and File,Probationary,22500,2500,134,carol.r,1234,Employee
-10030,Emelia ,Maceda,Account Rank and File,Probationary,22500,2500,134,emelia.m,1234,Employee
-10031,Delia ,Aguilar,Account Rank and File,Probationary,22500,2500,134,delia.a,1234,Employee
-10032,John Rafael,Castro,Sales & Marketing,Regular,52670,3500,314,johnrafael.c,1234,Employee
-10033,Carlos Ian,Martinez,Supply Chain and Logistics,Regular,52670,3500,314,carlosian.m,1234,Employee
-10034,Beatriz,Santos,Customer Service and Relations,Regular,52670,3500,314,beatriz.s,1234,Employee
+employeeId,firstName,lastName,position,employmentStatus,basicSalary,allowance,hourlyRate,username,password,role
+10001,Manuel III,Garcia,Chief Executive Officer,Regular,90000.0,4500.0,536.0,manuel.g,1234,Admin
+10002,Antonio,Lim,Chief Operating Officer,Regular,60000.0,4500.0,357.0,antonio.l,1234,Admin
+10003,Bianca Sofia,Aquino,Chief Finance Officer,Regular,60000.0,4500.0,357.0,biancasofia.a,1234,Admin
+10004,Isabella,Reyes,Chief Marketing Officer,Regular,60000.0,4500.0,357.0,isabella.r,1234,Admin
+10005,Eduard,Hernandez,IT Operations and Systems,Regular,52670.0,3500.0,314.0,edward.h,1234,IT
+10006,Andrea Mae,Villanueva,HR Manager,Regular,52670.0,3500.0,314.0,andreamae.v,1234,HR
+10007,Brad,San Jose,HR Team Leader,Regular,42975.0,3100.0,256.0,brad.sj,1234,HR
+10008,Alice,Romualdez,HR Rank and File,Regular,22500.0,2500.0,134.0,alice.r,1234,Employee
+10009,Rosie,Atienza,HR Rank and File,Regular,22500.0,2500.0,134.0,rosie.a,1234,Employee
+10010,Roderick,Alvaro,Accounting Head,Regular,52670.0,3500.0,314.0,roderick.a,1234,Finance
+10011,Anthony,Salcedo,Payroll Manager,Regular,50825.0,3500.0,303.0,anthony.s,1234,Finance
+10012,Josie,Lopez,Payroll Team Leader,Regular,38475.0,3100.0,229.0,josie.l,1234,Finance
+10013,Martha,Farala,Payroll Rank and File,Regular,24000.0,2500.0,143.0,martha.f,1234,Employee
+10014,Leila,Martinez,Payroll Rank and File,Regular,24000.0,2500.0,143.0,leila.m,1234,Employee
+10015,Fredrick,Romualdez,Account Manager,Regular,53500.0,3500.0,318.0,frederick.r,1234,Employee
+10016,Christian,Mata,Account Team Leader,Regular,42975.0,3100.0,256.0,christian.m,1234,Employee
+10017,Selena,De Leon,Account Team Leader,Regular,41850.0,3100.0,249.0,selena.dl,1234,Employee
+10018,Allison,San Jose,Account Rank and File,Regular,22500.0,2500.0,134.0,allison.sj,1234,Employee
+10019,Cydney,Rosario,Account Rank and File,Regular,22500.0,2500.0,134.0,cydney.r,1234,Employee
+10020,Mark,Bautista,Account Rank and File,Regular,23250.0,2500.0,138.0,mark.b,1234,Employee
+10021,Darlene,Lazaro,Account Rank and File,Probationary,23250.0,2500.0,138.0,darlene.l,1234,Employee
+10022,Kolby,Delos Santos,Account Rank and File,Probationary,24000.0,2500.0,143.0,kolby.ds,1234,Employee
+10023,Vella,Santos,Account Rank and File,Probationary,22500.0,2500.0,134.0,vella.s,1234,Employee
+10024,Tomas,Del Rosario,Account Rank and File,Probationary,22500.0,2500.0,134.0,tomas.dr,1234,Employee
+10025,Jacklyn,Tolentino,Account Rank and File,Probationary,24000.0,2500.0,143.0,jacklyn.t,1234,Employee
+10026,Percival,Gutierrez,Account Rank and File,Probationary,24750.0,2500.0,147.0,percival.g,1234,Employee
+10027,Garfield,Manalaysay,Account Rank and File,Probationary,24750.0,2500.0,147.0,garfield.m,1234,Employee
+10028,Lizeth,Villegas,Account Rank and File,Probationary,24000.0,2500.0,143.0,lizeth.v,1234,Employee
+10029,Carol,Ramos,Account Rank and File,Probationary,22500.0,2500.0,134.0,carol.r,1234,Employee
+10030,Emelia,Maceda,Account Rank and File,Probationary,22500.0,2500.0,134.0,emelia.m,1234,Employee
+10031,Delia,Aguilar,Account Rank and File,Probationary,22500.0,2500.0,134.0,delia.a,1234,Employee
+10032,John Rafael,Castro,Sales & Marketing,Regular,52670.0,3500.0,314.0,johnrafael.c,1234,Employee
+10033,Carlos Ian,Martinez,Supply Chain and Logistics,Regular,52670.0,3500.0,314.0,carlosian.m,1234,Employee
+10034,Beatriz,Santos,Customer Service and Relations,Regular,52670.0,3500.0,314.0,beatriz.s,1234,Employee
+10035,Rosephil,Muros,President,Permanent,200000.0,20000.0,1000.0,rosephil.m,1234,Employee

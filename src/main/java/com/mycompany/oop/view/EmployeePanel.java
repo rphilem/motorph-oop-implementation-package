@@ -55,12 +55,8 @@ public class EmployeePanel extends JPanel {
                 peso.format(employee.getBasicSalary())));
         salarySection.add(createRow("Allowance:",
                 peso.format(employee.getAllowance())));
-        salarySection.add(createRow("Gross Salary:",
-                peso.format(employee.computeGrossSalary())));
-        salarySection.add(createRow("Deductions:",
-                peso.format(employee.computeDeductions())));
-        salarySection.add(createRow("Net Salary:",
-                peso.format(employee.computeNetSalary())));
+        salarySection.add(createRow("Hourly Rate:",
+                peso.format(employee.getHourlyRate())));
 
         mainPanel.add(personalSection);
         mainPanel.add(Box.createVerticalStrut(20));

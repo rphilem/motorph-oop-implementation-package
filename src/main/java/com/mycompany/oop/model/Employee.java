@@ -167,83 +167,65 @@ public abstract class Employee implements Payables {
 
 
 
-
-
-//OOP PRINCIPLES//
-
-// 1. ENCAPSULATION
-
-//How does encapsulation happen here?
-//Encapsulation is applied by making all fields private and controlling access through public getters and setters with validation, ensuring that employee data cannot be modified directly or incorrectly.
-
-//Why use setters instead of public fields?
-//Setters allow us to enforce business rules and protect data integrity by rejecting invalid values.
-
-//Why is Employee only storing data?”
-//The Employee class follows single responsibility and acts as a model, while payroll logic will be handled by service classes.
-
-//Reflection:
-//Encapsulation is the practice of organizing code by protecting an object’s data and controlling how it is accessed. 
-//It involves deciding which attributes should be hidden and allowing interaction with them only through public methods such as getters and setters, 
-//ensuring data integrity and preventing direct modification.
-
-//Encapsulation is hiding an object’s data and allowing access to it only through controlled methods like getters and setters.
-
-//Encapsulation is an OOP principle that hides an object’s data by making fields private and controls access to them through public methods such as getters and setters.
-
-//When to make attribute public?
-//When to make attribute private?
-
-
-
-// 2. ABSTRACTION
-
-//Involves presenting only the essential attributes and hiding unnecessary information.
-//Primary objective is to hide implementation details from users.
-//In Java, it can be implemented using 2 key words - abstract and interface.
-
-//Encapsulation = protecting the data
-//Abstraction = protecting the code logic 
-
-//Abstract is a non-access modifier (different from public or private)
-//When a class or method is declared abstract, it means that they are partially implemented and the incomplete parts can be filled in  later.
-//Abstract classes can have member variables with access control but they can't be instantitated directly.
-
-//Interface provide total abstraction (pure abstract) by defining a set of methods in the class but without implementation details.
-//Cannot have member variables anbd cannot be instantiated directly.
-//Interface is not a class.
-//Interface is always public.
-
-// 3. Polymorphism
-// Static (compile-time polymorphism) or method Overloading
-// Dynamic (runtime polymorphism or method Overriding
-
 /*
-EMPLOYEE – ABSTRACT TEMPLATE UPDATE SUMMARY
+EMPLOYEE – CORE DOMAIN MODEL
 
 Purpose:
-Acts as payroll template using Template Method Pattern.
+Represents an employee entity in the MotorPH Payroll System.
+This class serves as the foundational data model that stores all
+employee-related information used across the system.
 
-Key Structure:
-Abstract computeGrossSalary()
-Abstract computeDeductions()
-Concrete computeNetSalary()
+Core Responsibilities:
+• Store employee identity and employment information
+• Maintain salary-related attributes (basic salary, allowance, hourly rate)
+• Manage login credentials and system role
+• Provide payroll template methods used by payroll computation services
 
-Enhancements:
-Centralized net salary logic
-Validation in setters
-Supports polymorphic payroll computation
+Key Attributes:
+• Employee ID
+• Personal information (first name, last name)
+• Employment details (position, employment status)
+• Compensation data (basic salary, allowance, hourly rate)
+• System credentials (username, password)
+• Access control role (Admin, HR, Finance, IT, Employee)
 
-Why Important:
-Allows future employee types:
-Contractual
-Part-time
-Probationary
-To override salary logic differently.
+Design Role in the Architecture:
+The Employee class is part of the Model layer in the system's layered
+architecture and acts as the primary domain object used by:
 
-Design Pattern:
-Template Method + Polymorphism
+• Repository layer – for CSV data persistence
+• Service layer – for business logic operations
+• UI layer – for displaying employee information
 
-Scalability:
-PayrollProcessor can adapt per subclass behavior automatically.
+OOP Concepts Implemented:
+• Encapsulation
+  Employee attributes are private and accessed through controlled
+  getters and setters.
+
+• Abstraction
+  The class defines abstract payroll methods that must be implemented
+  by concrete employee types.
+
+• Inheritance
+  Specific employee types such as RegularEmployee extend this class.
+
+• Polymorphism
+  Different employee types can implement their own payroll behaviors.
+
+Payroll Design Principle:
+This class defines the payroll computation template but does not
+implement government deduction logic directly. Actual payroll
+calculations are delegated to the PayrollProcessor service class.
+
+Template Methods:
+• computeGrossSalary()
+• computeDeductions()
+• computeNetSalary()
+
+The computeNetSalary() method follows the Template Method Pattern,
+ensuring consistent net salary calculation across employee types.
+
+System Role:
+Acts as the central data structure linking employee information,
+authentication, payroll processing, and role-based access control.
 */

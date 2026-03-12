@@ -8,7 +8,6 @@ import java.util.List;
 import com.mycompany.oop.model.Employee;
 import com.mycompany.oop.repository.EmployeeRepository;
 import com.mycompany.oop.repository.CsvEmployeeRepository;
-import java.util.Map;
 
 public class EmployeeService {
 
@@ -24,6 +23,10 @@ public class EmployeeService {
 
     public Employee findById(int id) {
         return repository.findEmployee(id);
+    }
+
+    public Employee findById(String idText) {
+        return findById(Integer.parseInt(idText));
     }
 
     public void addEmployee(Employee employee) {
@@ -51,16 +54,25 @@ public class EmployeeService {
         return roleCounts;
     }
     
-    public int getTotalUsers() {
-        return repository.getAllEmployees().size();
-    }
+        public int getTotalUsers() {
+            return repository.getAllEmployees().size();
+        }
 
-    public void changeRole(int id, String newRole) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+        public void changeRole(int id, String newRole) {
+            Employee employee = repository.findEmployee(id);
 
-    public void resetPassword(int id, String newPass) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+            if (employee != null && newRole != null && !newRole.trim().isEmpty()) {
+                employee.setRole(newRole.trim());
+                repository.updateEmployee(employee);
+            }
+        }
+
+        public void resetPassword(int id, String newPass) {
+            Employee employee = repository.findEmployee(id);
+
+            if (employee != null && newPass != null && !newPass.trim().isEmpty()) {
+                employee.setPassword(newPass.trim());
+                repository.updateEmployee(employee);
+            }
+        }
     }
-    
-}

@@ -22,14 +22,25 @@ public class LoginService {
     // Login method
     public Employee login(String username, String password) {
 
+        if (username == null || password == null) {
+            return null;
+        }
+
+        username = username.trim().toLowerCase();
+        password = password.trim();
+
+        if (username.isEmpty() || password.isEmpty()) {
+            return null;
+        }
+
         List<Employee> employees = repository.getAllEmployees();
 
         for (Employee emp : employees) {
 
-            if (emp.getUsername().equals(username)
+            if (emp.getUsername().equalsIgnoreCase(username)
                     && emp.getPassword().equals(password)) {
 
-                return emp;  // login successful
+                return emp; // login successful
             }
         }
 

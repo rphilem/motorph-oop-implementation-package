@@ -17,6 +17,9 @@ public class ITPanel extends JPanel {
     private EmployeeService service;
     private JTable table;
 
+    private JPanel cardsPanel;
+    private JPanel content;
+
     public ITPanel() {
 
         service = new EmployeeService();
@@ -26,11 +29,13 @@ public class ITPanel extends JPanel {
 
         add(UITheme.createTitleBar("System Administration"), BorderLayout.NORTH);
 
-        JPanel content = UITheme.createInsetPanel();
+        content = UITheme.createInsetPanel();
         content.setLayout(new BorderLayout());
         content.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
 
-        content.add(createDashboardCards(), BorderLayout.NORTH);
+        cardsPanel = createDashboardCards();
+
+        content.add(cardsPanel, BorderLayout.NORTH);
         content.add(createUserTable(), BorderLayout.CENTER);
         content.add(createButtonPanel(), BorderLayout.SOUTH);
 
@@ -134,6 +139,17 @@ public class ITPanel extends JPanel {
         table.setModel(model);
     }
 
+    private void refreshPanel() {
+        refreshTable();
+
+        content.remove(cardsPanel);
+        cardsPanel = createDashboardCards();
+        content.add(cardsPanel, BorderLayout.NORTH);
+
+        content.revalidate();
+        content.repaint();
+    }
+
     // ================= BUTTONS =================
     private JPanel createButtonPanel() {
 
@@ -164,11 +180,12 @@ public class ITPanel extends JPanel {
 
         String newPass = JOptionPane.showInputDialog(
                 this,
-                "Enter new password:");
+                "Enter new password:"
+        );
 
         if (newPass != null && !newPass.isEmpty()) {
             service.resetPassword(id, newPass);
-            refreshTable();
+            refreshPanel();
         }
     }
 
@@ -191,7 +208,7 @@ public class ITPanel extends JPanel {
 
         if (newRole != null) {
             service.changeRole(id, newRole);
-            refreshTable();
+            refreshPanel();
         }
     }
 }

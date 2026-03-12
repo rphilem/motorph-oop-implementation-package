@@ -9,9 +9,6 @@ import java.awt.*;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
-import java.awt.print.PrinterJob;
-import java.awt.print.Printable;
-import java.awt.Graphics2D;
 
 import com.mycompany.oop.model.Employee;
 import com.mycompany.oop.model.PayrollHistoryRecord;
@@ -33,8 +30,9 @@ public class PayslipPanel extends JPanel {
     private JLabel totalValue;
 
     private JLabel netValue;
+    private JLabel takeHomeValue;
 
-    public PayslipPanel(Employee employee){
+    public PayslipPanel(Employee employee) {
 
         payrollService = new PayrollService();
 
@@ -45,12 +43,11 @@ public class PayslipPanel extends JPanel {
 
         JPanel content = UITheme.createInsetPanel();
         content.setLayout(new BorderLayout());
-        content.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+        content.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // ================= FETCH HISTORY =================
         List<PayrollHistoryRecord> history =
-                payrollService.getPayrollHistoryForEmployee(
-                        employee.getEmployeeId());
+                payrollService.getPayrollHistoryForEmployee(employee.getEmployeeId());
 
         JComboBox<String> cutoffBox = new JComboBox<>();
         for (PayrollHistoryRecord r : history) {
@@ -69,21 +66,37 @@ public class PayslipPanel extends JPanel {
         breakdownPanel.setBackground(Color.WHITE);
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8,20,8,20);
+        gbc.insets = new Insets(8, 20, 8, 20);
         gbc.anchor = GridBagConstraints.WEST;
 
         // Initialize value labels
-        basicValue = createValueLabel();
-        allowanceValue = createValueLabel();
-        grossValue = createValueLabel();
+        basicValue = createValueLabelBold();
+        allowanceValue = createValueLabelBold();
+        grossValue = createValueLabelBold();
 
-        sssValue = createValueLabel();
-        philhealthValue = createValueLabel();
-        pagibigValue = createValueLabel();
-        taxValue = createValueLabel();
-        totalValue = createValueLabel();
+        sssValue = createValueLabelPlain();
+        philhealthValue = createValueLabelPlain();
+        pagibigValue = createValueLabelPlain();
+        taxValue = createValueLabelPlain();
+        totalValue = createValueLabelBold();
 
-        netValue = createValueLabel();
+        netValue = createValueLabelBold();
+        takeHomeValue = new JLabel("₱ 0.00");
+        takeHomeValue.setFont(new Font("Tahoma", Font.BOLD, 20));
+        takeHomeValue.setForeground(new Color(0, 102, 51));
+        takeHomeValue.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // ================= EMPLOYEE DETAILS =================
+        JLabel employeeNameLabel = new JLabel(
+                "Employee: " + employee.getFirstName() + " " + employee.getLastName());
+        employeeNameLabel.setFont(new Font("Tahoma", Font.PLAIN, 12));
+
+        JLabel employeeIdLabel = new JLabel(
+                "Employee ID: " + employee.getEmployeeId());
+        employeeIdLabel.setFont(new Font("Tahoma", Font.PLAIN, 12));
+
+        JLabel cutoffLabel = new JLabel("Cutoff Period: ");
+        cutoffLabel.setFont(new Font("Tahoma", Font.PLAIN, 12));
 
         // ================= EARNINGS =================
         addSectionTitle(breakdownPanel, gbc, 0, "EARNINGS");
@@ -107,64 +120,114 @@ public class PayslipPanel extends JPanel {
         addSectionTitle(breakdownPanel, gbc, 12, "NET PAY");
         addRow(breakdownPanel, gbc, 13, "Net Salary", netValue);
 
+        // ================= TAKE HOME PAY BOX =================
+        JPanel takeHomePanel = new JPanel(new BorderLayout());
+        takeHomePanel.setBackground(new Color(245, 245, 245));
+        takeHomePanel.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(210, 210, 210)),
+                        BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                )
+        );
+
+        JLabel takeHomeTitle = new JLabel("TAKE HOME PAY", SwingConstants.CENTER);
+        takeHomeTitle.setFont(new Font("Tahoma", Font.BOLD, 13));
+
+        takeHomePanel.add(takeHomeTitle, BorderLayout.NORTH);
+        takeHomePanel.add(takeHomeValue, BorderLayout.CENTER);
+
         // ================= CONFIDENTIAL NOTICE =================
         JLabel confidentialLabel = new JLabel(
                 "<html><center><i>CONFIDENTIAL: This document contains sensitive payroll information intended solely for the employee. Unauthorized disclosure is strictly prohibited.</i></center></html>"
         );
         confidentialLabel.setFont(new Font("Tahoma", Font.PLAIN, 10));
-        confidentialLabel.setForeground(new Color(120,120,120));
+        confidentialLabel.setForeground(new Color(120, 120, 120));
         confidentialLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        confidentialLabel.setBorder(BorderFactory.createEmptyBorder(15,10,10,10));
+        confidentialLabel.setBorder(BorderFactory.createEmptyBorder(15, 10, 10, 10));
 
+        // ================= WRAPPER =================
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setBackground(Color.WHITE);
         wrapper.setBorder(
                 BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(210,210,210)),
-                        BorderFactory.createEmptyBorder(15,30,15,30)
+                        BorderFactory.createLineBorder(new Color(210, 210, 210)),
+                        BorderFactory.createEmptyBorder(15, 30, 15, 30)
                 )
         );
 
         JLabel headerLabel = new JLabel("MotorPH Payroll Payslip", SwingConstants.CENTER);
         headerLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
-        headerLabel.setBorder(BorderFactory.createEmptyBorder(10,10,20,10));
+        headerLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JPanel detailsPanel = new JPanel();
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
+        detailsPanel.setBackground(Color.WHITE);
+        detailsPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 15, 10));
+        detailsPanel.add(employeeNameLabel);
+        detailsPanel.add(Box.createVerticalStrut(3));
+        detailsPanel.add(employeeIdLabel);
+        detailsPanel.add(Box.createVerticalStrut(3));
+        detailsPanel.add(cutoffLabel);
+
+        JPanel centerWrapper = new JPanel(new BorderLayout());
+        centerWrapper.setBackground(Color.WHITE);
+        centerWrapper.add(detailsPanel, BorderLayout.NORTH);
+        centerWrapper.add(breakdownPanel, BorderLayout.CENTER);
+
+        JPanel southWrapper = new JPanel(new BorderLayout());
+        southWrapper.setBackground(Color.WHITE);
+        southWrapper.setBorder(BorderFactory.createEmptyBorder(20, 40, 0, 40));
+        southWrapper.add(takeHomePanel, BorderLayout.CENTER);
+
+        JPanel bottomWrapper = new JPanel(new BorderLayout());
+        bottomWrapper.setBackground(Color.WHITE);
+        bottomWrapper.add(southWrapper, BorderLayout.NORTH);
+        bottomWrapper.add(confidentialLabel, BorderLayout.SOUTH);
 
         wrapper.add(headerLabel, BorderLayout.NORTH);
-        wrapper.add(breakdownPanel, BorderLayout.CENTER);
-        wrapper.add(confidentialLabel, BorderLayout.SOUTH);
+        wrapper.add(centerWrapper, BorderLayout.CENTER);
+        wrapper.add(bottomWrapper, BorderLayout.SOUTH);
 
-        content.add(wrapper, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(wrapper);
+        scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
+        content.add(scrollPane, BorderLayout.CENTER);
+        
         // ================= BUTTONS =================
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
         buttonPanel.setBackground(Color.WHITE);
 
-        JButton printBtn = UITheme.createAccentButton("Print");
+        JButton viewBtn = UITheme.createAccentButton("View Payslip");
         JButton downloadBtn = UITheme.createButton("Download");
+        JButton printBtn = UITheme.createButton("Print");
 
-        printBtn.setPreferredSize(new Dimension(120,35));
-        downloadBtn.setPreferredSize(new Dimension(120,35));
+        viewBtn.setPreferredSize(new Dimension(140, 35));
+        downloadBtn.setPreferredSize(new Dimension(120, 35));
+        printBtn.setPreferredSize(new Dimension(120, 35));
 
-        printBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+        viewBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
         downloadBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+        printBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
 
+        buttonPanel.add(viewBtn);
         buttonPanel.add(downloadBtn);
         buttonPanel.add(printBtn);
 
         content.add(buttonPanel, BorderLayout.SOUTH);
         add(content, BorderLayout.CENTER);
-        
 
         // ================= DROPDOWN ACTION =================
         NumberFormat peso =
-                NumberFormat.getCurrencyInstance(new Locale("en","PH"));
+                NumberFormat.getCurrencyInstance(new Locale("en", "PH"));
 
         cutoffBox.addActionListener(e -> {
-
             int index = cutoffBox.getSelectedIndex();
-            if(index >= 0){
 
+            if (index >= 0) {
                 PayrollHistoryRecord record = history.get(index);
+
+                cutoffLabel.setText("Cutoff Period: " + record.getCutoffPeriod());
 
                 basicValue.setText(peso.format(record.getBasicComponent()));
                 allowanceValue.setText(peso.format(record.getAllowanceComponent()));
@@ -177,10 +240,44 @@ public class PayslipPanel extends JPanel {
                 totalValue.setText(peso.format(record.getTotalDeductions()));
 
                 netValue.setText(peso.format(record.getNet()));
+                takeHomeValue.setText(peso.format(record.getNet()));
             }
         });
 
-        if(!history.isEmpty()){
+        // ================= VIEW POPUP ACTION =================
+        viewBtn.addActionListener(e -> {
+            int index = cutoffBox.getSelectedIndex();
+
+            if (index >= 0) {
+                PayrollHistoryRecord record = history.get(index);
+
+                PayslipDialog dialog = new PayslipDialog(
+                        SwingUtilities.getWindowAncestor(this),
+                        employee,
+                        record
+                );
+                dialog.setVisible(true);
+            }
+        });
+
+        // ================= PRINT ACTION =================
+        printBtn.addActionListener(e -> {
+            int index = cutoffBox.getSelectedIndex();
+
+            if (index >= 0) {
+                PayrollHistoryRecord record = history.get(index);
+
+                PayslipDialog dialog = new PayslipDialog(
+                        SwingUtilities.getWindowAncestor(this),
+                        employee,
+                        record,
+                        true
+                );
+                dialog.setVisible(true);
+            }
+        });
+
+        if (!history.isEmpty()) {
             cutoffBox.setSelectedIndex(0);
         }
     }
@@ -189,10 +286,20 @@ public class PayslipPanel extends JPanel {
     private void addRow(JPanel panel, GridBagConstraints gbc,
                         int y, String labelText, JLabel valueLabel) {
 
+        JLabel label = new JLabel(labelText);
+
+        if ("Gross Pay".equals(labelText)
+                || "Total Deductions".equals(labelText)
+                || "Net Salary".equals(labelText)) {
+            label.setFont(new Font("Tahoma", Font.BOLD, 13));
+        } else {
+            label.setFont(new Font("Tahoma", Font.PLAIN, 13));
+        }
+
         gbc.gridx = 0;
         gbc.gridy = y;
         gbc.weightx = 0;
-        panel.add(new JLabel(labelText), gbc);
+        panel.add(label, gbc);
 
         gbc.gridx = 1;
         gbc.weightx = 1;
@@ -231,19 +338,25 @@ public class PayslipPanel extends JPanel {
         gbc.gridy = y;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(10,25,10,25);
+        gbc.insets = new Insets(10, 25, 10, 25);
 
         panel.add(new JSeparator(), gbc);
 
         gbc.gridwidth = 1;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.insets = new Insets(8,20,8,20); // reset
+        gbc.insets = new Insets(8, 20, 8, 20);
     }
-    
+
     // ================= VALUE LABEL CREATOR =================
-    private JLabel createValueLabel(){
+    private JLabel createValueLabelBold() {
         JLabel lbl = new JLabel("₱ 0.00");
         lbl.setFont(new Font("Tahoma", Font.BOLD, 13));
+        return lbl;
+    }
+
+    private JLabel createValueLabelPlain() {
+        JLabel lbl = new JLabel("₱ 0.00");
+        lbl.setFont(new Font("Tahoma", Font.PLAIN, 13));
         return lbl;
     }
 }

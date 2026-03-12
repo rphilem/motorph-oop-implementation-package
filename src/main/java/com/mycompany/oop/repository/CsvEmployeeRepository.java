@@ -22,11 +22,16 @@ public class CsvEmployeeRepository implements EmployeeRepository {
     @Override
     public void addEmployee(Employee employee) {
 
-        try (BufferedWriter bw = new BufferedWriter(
-                new FileWriter(filePath, true))) {
+        try {
+            File file = new File(filePath);
+            boolean needsNewLine = file.exists() && file.length() > 0;
 
-            bw.write(formatEmployee(employee));
-            bw.newLine();
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, true))) {
+                if (needsNewLine) {
+                    bw.newLine();
+                }
+                bw.write(formatEmployee(employee));
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -113,6 +118,12 @@ public class CsvEmployeeRepository implements EmployeeRepository {
     public List<Employee> getAllEmployees() {
 
         List<Employee> employees = new ArrayList<>();
+        
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            return employees;
+        }
 
         try (BufferedReader br = new BufferedReader(
                 new FileReader(filePath))) {
@@ -122,10 +133,20 @@ public class CsvEmployeeRepository implements EmployeeRepository {
             // Skip header
             br.readLine();
 
-            while ((line = br.readLine()) != null) {
+        while ((line = br.readLine()) != null) {
 
-                String[] data = line.split(",");
+            if (line.trim().isEmpty()) {
+                continue;
+            }
 
+            String[] data = line.split(",");
+
+            if (data.length < 11) {
+                System.out.println("Skipped invalid employee row: " + line);
+                continue;
+            }
+
+            try {
                 int employeeId = Integer.parseInt(data[0].trim());
                 String firstName = data[1].trim();
                 String lastName = data[2].trim();
@@ -153,7 +174,11 @@ public class CsvEmployeeRepository implements EmployeeRepository {
                 );
 
                 employees.add(employee);
+
+            } catch (NumberFormatException ex) {
+                System.out.println("Skipped malformed employee row: " + line);
             }
+        }
 
         } catch (IOException e) {
             e.printStackTrace();

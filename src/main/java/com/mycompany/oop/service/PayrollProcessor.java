@@ -13,26 +13,11 @@ public class PayrollProcessor {
 
         PayrollRecord record = new PayrollRecord(emp, hoursWorked);
 
-        double gross;
-        double basicHalf;
-        double allowanceHalf;
-
         // ================= GROSS COMPUTATION =================
 
-        if (emp.getHourlyRate() > 0) {
-
-            gross = hoursWorked * emp.getHourlyRate();
-
-            basicHalf = gross;
-            allowanceHalf = 0;
-
-        } else {
-
-            basicHalf = emp.getBasicSalary() / 2;
-            allowanceHalf = emp.getAllowance() / 2;
-
-            gross = basicHalf + allowanceHalf;
-        }
+        double basicHalf = emp.getBasicSalary() / 2;
+        double allowanceHalf = emp.getAllowance() / 2;
+        double gross = basicHalf + allowanceHalf;
 
         record.setBasicComponent(basicHalf);
         record.setAllowanceComponent(allowanceHalf);
@@ -96,51 +81,74 @@ public class PayrollProcessor {
 
         return record;
     }
+    
+    public PayrollRecord processPayroll(Employee emp) {
+        double defaultHours = 80;
+        return processPayroll(emp, defaultHours);
+    }
+
 }
 
 /*
-PAYROLL PROCESSOR – COMPUTATION ENGINE UPDATE SUMMARY
+PAYROLL PROCESSOR – COMPUTATION ENGINE SUMMARY
 
 Purpose:
-Handles payroll computation logic per employee
-for a specific payroll cutoff period.
+Handles payroll computation for an employee per payroll cutoff period.
 
 Core Responsibility:
-• Compute cutoff-based gross pay
+• Compute semi-monthly gross pay
 • Convert cutoff gross to monthly equivalent for deduction bracket evaluation
 • Compute government deductions (SSS, PhilHealth, Pag-IBIG, Withholding Tax)
 • Convert deductions back to cutoff values
-• Return a PayrollRecord object containing full breakdown
+• Return a PayrollRecord object containing the full payroll breakdown
 
-Major Correction (Computation Consistency Fix):
-• Standardized all stored deduction values as CUTOFF-based amounts
-• Removed mismatch between monthly deduction display and semi-monthly totals
-• Ensured:
-      Net Salary = Gross (cutoff) - Total Deductions (cutoff)
-• Allowance is treated consistently as monthly and divided per cutoff
-• Eliminated rounding inconsistencies caused by mixed storage logic
+Gross Salary Logic:
+• Gross Pay is computed using the standard MotorPH rule:
+      Gross (cutoff) = (Basic Salary / 2) + (Allowance / 2)
 
-Architectural Improvement:
-• Government deduction logic fully moved to backend
-• UI no longer performs any payroll computation
-• PayrollRecord encapsulates breakdown data cleanly
-• Employee model remains immutable and payroll-agnostic
+• Basic Salary and Allowance are treated as monthly values and divided
+  equally per payroll cutoff.
 
-Why This Matters:
-• Prevents mismatch between displayed breakdown and computed totals
-• Ensures payslip integrity
-• Makes payroll logic auditable and predictable
-• Enables proper approval workflow without recalculation risk
+Deduction Logic:
+Government deductions are evaluated using the **monthly equivalent salary**
+to determine the correct contribution bracket.
+
+Steps:
+1. Compute cutoff gross salary
+2. Convert cutoff gross to monthly equivalent (gross × 2)
+3. Determine monthly statutory deductions:
+      - SSS
+      - PhilHealth
+      - Pag-IBIG
+      - Withholding Tax
+4. Convert deductions back to cutoff values (divide by 2)
+5. Compute final net salary:
+
+      Net Salary = Gross (cutoff) − Total Deductions (cutoff)
+
+Architectural Design:
+• Payroll computation is handled entirely in the Service layer
+• UI components do not perform payroll calculations
+• PayrollRecord encapsulates the payroll breakdown cleanly
+• Employee model only provides base salary data and remains payroll-agnostic
 
 Design Principle:
 Stateless computation engine.
-No internal data persistence.
-Pure input (Employee + hoursWorked) → deterministic PayrollRecord output.
 
-Scalability Roadmap:
-• Replace simplified SSS logic with official contribution table
-• Externalize tax brackets to configuration file
-• Dynamic PhilHealth rate update support
-• Per-employee attendance-based computation
-• Future payroll policy versioning system
+The processor does not persist data internally.
+It accepts input (Employee + hoursWorked) and produces a deterministic
+PayrollRecord output.
+
+Benefits:
+• Ensures consistent payroll calculations across the system
+• Prevents mismatch between displayed payslip breakdown and totals
+• Keeps business logic centralized and maintainable
+• Supports future payroll policy changes without UI modification
+
+Possible Future Enhancements:
+• Replace simplified SSS logic with full official contribution table
+• Externalize tax brackets to configuration
+• Dynamic PhilHealth rate updates
+• Attendance-based payroll computation
+• Versioned payroll policy support
 */
