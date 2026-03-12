@@ -12,12 +12,12 @@ This system was reconstructed from a procedural CP2 version and refactored into 
 
 Milestone 2 focused on:
 
-- Extracting business logic from the GUI
-- Implementing a layered architecture
-- Applying service and repository abstraction
-- Enforcing separation of concerns
-- Improving maintainability and scalability
-- Ensuring alignment with the approved MS1 scope
+- Extracting business logic from the GUI  
+- Implementing a layered architecture  
+- Applying service and repository abstraction  
+- Enforcing separation of concerns  
+- Improving maintainability and scalability  
+- Ensuring alignment with the approved MS1 scope  
 
 This repository contains the finalized and fully tested OOP implementation.
 
@@ -27,79 +27,103 @@ This repository contains the finalized and fully tested OOP implementation.
 
 The application follows a layered architecture:
 
-View Layer → Service Layer → Processor → Repository Layer → Model
+View Layer → Service Layer → Processor Layer → Repository Layer → Model
 
 ### 1. View Layer
+
 Responsible for user interaction and display only.
 
 Includes:
-- PayrollPanel
-- PayslipPanel
-- DashboardPanel
-- Login UI
-- Leave UI
+
+- LoginFrame  
+- MainAppFrame  
+- DashboardPanel  
+- EmployeePanel  
+- EmployeeFormDialog  
+- PayrollPanel  
+- PayslipPanel  
+- PayslipDialog  
+- AttendancePanel  
+- LeavePanel  
+- LeaveReviewPanel  
+- ITPanel  
 
 The UI contains no business logic.
 
 ---
 
 ### 2. Service Layer
+
 Handles application coordination and business rule enforcement.
 
 Classes:
-- PayrollService
-- EmployeeService
-- LeaveService
-- LoginService
-- DashboardService
+
+- PayrollService  
+- EmployeeService  
+- LeaveService  
+- AttendanceService  
+- LoginService  
+- DashboardService  
 
 Responsibilities:
-- Coordinate operations
-- Call the processor for payroll computation
-- Interact with repository for persistence
-- Enforce business validation rules
+
+- Coordinate operations  
+- Call the processor for payroll computation  
+- Interact with repositories for persistence  
+- Enforce business validation rules  
+- Enforce role-based access control  
 
 ---
 
 ### 3. Processor Layer
+
 Class:
+
 - PayrollProcessor
 
 Responsibilities:
-- Handles all payroll computation logic
-- Stateless design
+
+- Handles all payroll computation logic  
+- Stateless design  
 - Computes:
-  - Gross Pay
-  - Government Deductions (SSS, PhilHealth, Pag-IBIG, Tax)
-  - Monthly-to-semi-monthly conversion
-  - Net Pay
+
+  - Gross Pay  
+  - Government Deductions (SSS, PhilHealth, Pag-IBIG, Tax)  
+  - Monthly-to-semi-monthly conversion  
+  - Net Pay  
 
 No UI or file operations exist in this layer.
 
 ---
 
 ### 4. Repository Layer
-Interface:
-- PayrollHistoryRepository
 
-Implementation:
-- CsvPayrollHistoryRepository
+Repositories abstract data persistence using CSV storage.
+
+Repositories:
+
+- CsvEmployeeRepository  
+- CsvAttendanceRepository  
+- CsvPayrollHistoryRepository  
 
 Responsibilities:
-- Save payroll records
-- Retrieve payroll history
-- Prevent duplicate cutoff entries
-- Abstract file persistence from business logic
+
+- Save payroll records  
+- Retrieve payroll history  
+- Save and retrieve attendance records  
+- Prevent duplicate cutoff entries  
+- Abstract file persistence from business logic  
 
 ---
 
 ### 5. Model Classes
 
-- Employee
-- PayrollRecord
-- PayrollHistoryRecord
-- PayrollSummary
-- LeaveRequest
+- Employee  
+- RegularEmployee  
+- PayrollRecord  
+- PayrollHistoryRecord  
+- AttendanceRecord  
+- LeaveRequest  
 
 These classes encapsulate structured system data.
 
@@ -109,45 +133,61 @@ These classes encapsulate structured system data.
 
 Payroll follows structured cutoff computation:
 
-1. Gross Pay (Cutoff)
+1. Gross Pay (Cutoff)  
    Gross = Basic (Semi-Monthly) + Allowance (Semi-Monthly)
 
-2. Monthly Equivalent
+2. Monthly Equivalent  
    Monthly Equivalent = Gross × 2
 
-3. Monthly Deductions
-   - SSS
-   - PhilHealth
-   - Pag-IBIG
-   - Withholding Tax
+3. Monthly Deductions  
 
-4. Cutoff Deductions
+   - SSS  
+   - PhilHealth  
+   - Pag-IBIG  
+   - Withholding Tax  
+
+4. Cutoff Deductions  
    Cutoff Deduction = Monthly Deduction ÷ 2
 
-5. Net Pay
+5. Net Pay  
    Net = Gross − Total Cutoff Deductions
 
 Allowance is not included in government deduction computation.
 
-All payroll formulas are centralized in PayrollProcessor.
+All payroll formulas are centralized in **PayrollProcessor**.
 
 ---
 
 ## CSV Structure
 
-Payroll records are stored in CSV format using the following structure:
+System records are stored in CSV format under:
 
-employeeId,  
-cutoffPeriod,  
-basicComponent,  
-allowanceComponent,  
-gross,  
-sss,  
-philhealth,  
-pagibig,  
-tax,  
-totalDeductions,  
-net  
+```
+src/main/resources/
+```
+
+Files used by the system:
+
+- employees.csv  
+- attendance.csv  
+- payroll_history.csv  
+- leaves.csv  
+
+Payroll records are stored using the following structure:
+
+```
+employeeId,
+cutoffPeriod,
+basicComponent,
+allowanceComponent,
+gross,
+sss,
+philhealth,
+pagibig,
+tax,
+totalDeductions,
+net
+```
 
 All file operations are handled through the repository layer.
 
@@ -158,27 +198,31 @@ All file operations are handled through the repository layer.
 Testing was conducted progressively across development stages.
 
 ### Week 7 – Backend Console Testing
-- Verified gross computation
-- Verified deduction formulas
-- Verified net salary accuracy
+
+- Verified gross computation  
+- Verified deduction formulas  
+- Verified net salary accuracy  
 
 ### Week 8 – Subclass and Polymorphism Testing
-- Validated overridden methods
-- Tested polymorphic employee behavior
-- Confirmed dynamic binding correctness
+
+- Validated overridden methods  
+- Tested polymorphic employee behavior  
+- Confirmed dynamic binding correctness  
 
 ### Week 9 – GUI Integration Testing
-- Verified UI to Service communication
-- Checked parameter mapping
-- Conducted smoke testing
-- Documented known issues
+
+- Verified UI to Service communication  
+- Checked parameter mapping  
+- Conducted smoke testing  
+- Documented known issues  
 
 ### Week 10 – Final Internal QA
-- Revalidated payroll outputs
-- Fixed GUI integration issues
-- Confirmed layered architecture integrity
-- Updated Smoke Test Checklist
-- Finalized Known Issues List
+
+- Revalidated payroll outputs  
+- Fixed GUI integration issues  
+- Confirmed layered architecture integrity  
+- Updated Smoke Test Checklist  
+- Finalized Known Issues List  
 
 The system produces consistent and correct payroll outputs.
 
@@ -186,13 +230,14 @@ The system produces consistent and correct payroll outputs.
 
 ## OOP Principles Applied
 
-- Encapsulation
-- Abstraction
-- Polymorphism
-- Separation of Concerns
-- Single Responsibility Principle
-- Repository Pattern
-- Layered Architecture
+- Encapsulation  
+- Abstraction  
+- Inheritance  
+- Polymorphism  
+- Separation of Concerns  
+- Single Responsibility Principle  
+- Repository Pattern  
+- Layered Architecture  
 
 All CP2 procedural logic was refactored into proper OOP structure.
 
@@ -200,15 +245,18 @@ All CP2 procedural logic was refactored into proper OOP structure.
 
 ## Features
 
-- Employee Management (Add, Update, Delete)
-- Payroll Processing
-- Payroll History Tracking
-- Duplicate Cutoff Prevention
-- Payslip Viewing
-- Leave Submission
-- Leave Approval / Rejection
-- Dashboard Metrics
-- Authentication
+- Authentication (Login System)  
+- Role-Based Access Control (RBAC)  
+- Employee Management (Add, Update, Delete)  
+- Payroll Processing  
+- Payroll History Tracking  
+- Duplicate Cutoff Prevention  
+- Payslip Viewing  
+- Payslip Print Preview  
+- Attendance Time In / Time Out  
+- Leave Submission  
+- Leave Approval / Rejection  
+- Dashboard Metrics  
 
 No additional features were added beyond MS1 scope.
 
@@ -216,11 +264,11 @@ No additional features were added beyond MS1 scope.
 
 ## Milestone 2 Documentation
 
-- Refactoring Plan
-- Smoke Test Checklist
-- Known Issues List
-- Task Breakdown
-- CP2 to OOP Mapping
+- Refactoring Plan  
+- Smoke Test Checklist  
+- Known Issues List  
+- Task Breakdown  
+- CP2 to OOP Mapping  
 
 Full worksheet available here:
 
@@ -234,8 +282,9 @@ Group 24
 Section S2101  
 
 Members:
-- Rosephil Muros
-- Claire Helery Noel
+
+- Rosephil Muros  
+- Claire Helery Noel  
 
 ---
 
@@ -246,6 +295,6 @@ This version represents the completed Milestone 2 OOP refactoring of the MotorPH
 All computation logic is centralized.  
 All persistence is abstracted.  
 All UI components are logic-free.  
-The architecture strictly follows the approved MS1 design.  
+The architecture strictly follows the approved MS1 design.
 
 The system is fully tested and ready for evaluation.
