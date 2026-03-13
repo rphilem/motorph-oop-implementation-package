@@ -13,54 +13,39 @@ import com.mycompany.oop.repository.CsvPayrollHistoryRepository;
 
 import java.util.List;
 
-/*
-    PayrollService
-
-    Business layer for payroll processing.
-    Coordinates:
-    - EmployeeService
-    - PayrollProcessor
-    - PayrollHistoryRepository
-*/
-
 public class PayrollService {
 
     private EmployeeService employeeService;
     private PayrollProcessor processor;
     private PayrollHistoryRepository historyRepository;
+    private AttendanceService attendanceService;
 
     public PayrollService() {
         this.employeeService = new EmployeeService();
         this.processor = new PayrollProcessor();
         this.historyRepository = new CsvPayrollHistoryRepository();
+        this.attendanceService = new AttendanceService();
     }
 
-    /*
-        Generate payroll summary for dashboard cards
-    */
-    public PayrollSummary generatePayrollSummary(double hoursWorked) {
+    // ================= SUMMARY (attendance-based) =================
 
-        List<Employee> employees =
-                employeeService.getAllEmployees();
+    public PayrollSummary generatePayrollSummary(String cutoffPeriod) {
 
-        double totalGross = 0;
-        double totalDeductions = 0;
-        double totalNet = 0;
+        List<Employee> employees = employeeService.getAllEmployees();
 
-        double totalSSS = 0;
-        double totalPhilhealth = 0;
-        double totalPagibig = 0;
-        double totalTax = 0;
+        double totalGross = 0, totalDeductions = 0, totalNet = 0;
+        double totalSSS = 0, totalPhilhealth = 0, totalPagibig = 0, totalTax = 0;
 
         for (Employee e : employees) {
 
-            PayrollRecord record =
-                    processor.processPayroll(e, hoursWorked);
+            double hours = attendanceService.getHoursForCutoff(
+                    e.getEmployeeId(), cutoffPeriod);
+
+            PayrollRecord record = processor.processPayroll(e, hours);
 
             totalGross += record.getGross();
             totalDeductions += record.getTotalDeductions();
             totalNet += record.getNet();
-
             totalSSS += record.getSss();
             totalPhilhealth += record.getPhilhealth();
             totalPagibig += record.getPagibig();
@@ -68,48 +53,62 @@ public class PayrollService {
         }
 
         return new PayrollSummary(
-                totalGross,
-                totalDeductions,
-                totalNet,
+                totalGross, totalDeductions, totalNet,
                 employees.size(),
-                totalSSS,
-                totalPhilhealth,
-                totalPagibig,
-                totalTax
+                totalSSS, totalPhilhealth, totalPagibig, totalTax
         );
     }
 
-    /*
-        Process payroll and save history
-        Prevent duplicate cutoff processing
-    */
-    public boolean processAndSavePayroll(
-            double hoursWorked,
-            String cutoffPeriod,
-            boolean overwriteIfExists
-    ) {
+    // ================= SUMMARY (legacy, fixed hours) =================
 
-        // Check if cutoff already processed
-        if (historyRepository.existsByCutoff(cutoffPeriod)) {
+    public PayrollSummary generatePayrollSummary(double hoursWorked) {
 
-            if (!overwriteIfExists) {
-                return false; // duplicate not allowed
-            }
+        List<Employee> employees = employeeService.getAllEmployees();
 
-            // Overwrite mode for demo reset
-            historyRepository.deleteByCutoff(cutoffPeriod);
-        }
-
-        List<Employee> employees =
-                employeeService.getAllEmployees();
+        double totalGross = 0, totalDeductions = 0, totalNet = 0;
+        double totalSSS = 0, totalPhilhealth = 0, totalPagibig = 0, totalTax = 0;
 
         for (Employee e : employees) {
 
-            PayrollRecord record =
-                    processor.processPayroll(e, hoursWorked);
+            PayrollRecord record = processor.processPayroll(e, hoursWorked);
 
-            PayrollHistoryRecord history =
-                new PayrollHistoryRecord(
+            totalGross += record.getGross();
+            totalDeductions += record.getTotalDeductions();
+            totalNet += record.getNet();
+            totalSSS += record.getSss();
+            totalPhilhealth += record.getPhilhealth();
+            totalPagibig += record.getPagibig();
+            totalTax += record.getTax();
+        }
+
+        return new PayrollSummary(
+                totalGross, totalDeductions, totalNet,
+                employees.size(),
+                totalSSS, totalPhilhealth, totalPagibig, totalTax
+        );
+    }
+
+    // ================= PROCESS & SAVE (attendance-based) =================
+
+    public boolean processAndSavePayroll(String cutoffPeriod, boolean overwriteIfExists) {
+
+        if (historyRepository.existsByCutoff(cutoffPeriod)) {
+            if (!overwriteIfExists) {
+                return false;
+            }
+            historyRepository.deleteByCutoff(cutoffPeriod);
+        }
+
+        List<Employee> employees = employeeService.getAllEmployees();
+
+        for (Employee e : employees) {
+
+            double hours = attendanceService.getHoursForCutoff(
+                    e.getEmployeeId(), cutoffPeriod);
+
+            PayrollRecord record = processor.processPayroll(e, hours);
+
+            PayrollHistoryRecord history = new PayrollHistoryRecord(
                     e.getEmployeeId(),
                     cutoffPeriod,
                     record.getBasicComponent(),
@@ -121,7 +120,7 @@ public class PayrollService {
                     record.getTax(),
                     record.getTotalDeductions(),
                     record.getNet()
-                );
+            );
 
             historyRepository.savePayrollRecord(history);
         }
@@ -129,79 +128,78 @@ public class PayrollService {
         return true;
     }
 
-    /*
-        Get payroll history of one employee
-        Used by PayslipPanel
-    */
-    public List<PayrollHistoryRecord>
-    getPayrollHistoryForEmployee(int employeeId) {
+    // ================= PROCESS & SAVE (legacy, fixed hours) =================
 
-        return historyRepository
-                .findByEmployeeId(employeeId);
+    public boolean processAndSavePayroll(
+            double hoursWorked,
+            String cutoffPeriod,
+            boolean overwriteIfExists) {
+
+        if (historyRepository.existsByCutoff(cutoffPeriod)) {
+            if (!overwriteIfExists) {
+                return false;
+            }
+            historyRepository.deleteByCutoff(cutoffPeriod);
+        }
+
+        List<Employee> employees = employeeService.getAllEmployees();
+
+        for (Employee e : employees) {
+
+            PayrollRecord record = processor.processPayroll(e, hoursWorked);
+
+            PayrollHistoryRecord history = new PayrollHistoryRecord(
+                    e.getEmployeeId(),
+                    cutoffPeriod,
+                    record.getBasicComponent(),
+                    record.getAllowanceComponent(),
+                    record.getGross(),
+                    record.getSss(),
+                    record.getPhilhealth(),
+                    record.getPagibig(),
+                    record.getTax(),
+                    record.getTotalDeductions(),
+                    record.getNet()
+            );
+
+            historyRepository.savePayrollRecord(history);
+        }
+
+        return true;
     }
 
-    /*
-        Expose employees for payroll table
-    */
+    // ================= ATTENDANCE INTEGRATION =================
+
+    public List<String> getAvailableCutoffs() {
+        return attendanceService.getAvailableCutoffs();
+    }
+
+    public double getHoursForCutoff(int employeeId, String cutoffPeriod) {
+        return attendanceService.getHoursForCutoff(employeeId, cutoffPeriod);
+    }
+
+    // ================= SINGLE EMPLOYEE =================
+
+    public PayrollRecord processPayrollForEmployee(
+            Employee employee, double hoursWorked) {
+        return processor.processPayroll(employee, hoursWorked);
+    }
+
+    // ================= HISTORY =================
+
+    public List<PayrollHistoryRecord> getPayrollHistoryForEmployee(int employeeId) {
+        return historyRepository.findByEmployeeId(employeeId);
+    }
+
     public List<Employee> getEmployees() {
         return employeeService.getAllEmployees();
     }
-    
+
     public List<PayrollHistoryRecord> getAllPayrollHistory() {
         return historyRepository.findAll();
     }
-    
+
     public void deleteCutoff(String cutoffPeriod) {
         historyRepository.deleteByCutoff(cutoffPeriod);
     }
-    
 }
-
-/*
-PAYROLL SERVICE – BUSINESS LOGIC UPDATE SUMMARY
-
-Purpose:
-Central business layer for payroll operations.
-
-Responsibilities:
-Generate payroll summaries for dashboard
-Process payroll for all employees
-Save payroll history
-Prevent duplicate cutoff processing
-Provide employee-specific payroll history
-
-Major Enhancements:
-1. Duplicate Cutoff Protection
-
-processAndSavePayroll(...) now:
-Checks if cutoff already exists
-Blocks duplicate runs
-Allows optional overwrite for demo
-
-2. Government Deduction Aggregation
-
-generatePayrollSummary(...) now calculates:
-Total Gross
-Total Deductions
-Total Net
-Total SSS
-Total PhilHealth
-Total Pag-IBIG
-Total Tax
-
-3. Payslip Integration
-getPayrollHistoryForEmployee(...)
-Enables employee-specific payroll history display.
-
-Architecture Improvements:
-Separated payroll processing (PayrollProcessor)
-Separated data persistence (Repository)
-Service coordinates both layers
-
-Scalability:
-Easily extendable to:
-Attendance integration
-Per-employee hours
-Multi-cutoff automation
-Payroll approval workflows
-*/

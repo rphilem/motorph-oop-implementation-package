@@ -5,6 +5,7 @@
 package com.mycompany.oop.view;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import com.mycompany.oop.model.Employee;
 
@@ -12,22 +13,19 @@ public class GradientHeaderPanel extends JPanel {
 
     public GradientHeaderPanel(Employee employee) {
 
-        setPreferredSize(new Dimension(1000, 40));
+        setPreferredSize(new Dimension(1000, 44));
         setLayout(new BorderLayout());
+        setBackground(UITheme.SIDEBAR_BG);
+        setBorder(new EmptyBorder(0, 16, 0, 16));
 
-        setBackground(new Color(0, 0, 128)); // Win95 navy
-
-        JLabel title = new JLabel(
-                "  MotorPH Payroll System"
-        );
-        title.setForeground(Color.WHITE);
-        title.setFont(new Font("Tahoma", Font.BOLD, 13));
+        JLabel title = new JLabel("MotorPH Payroll System");
+        title.setForeground(UITheme.ACCENT);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
         JLabel userInfo = new JLabel(
-                employee.getFirstName() + " (" + employee.getRole() + ")  "
-        );
-        userInfo.setForeground(Color.WHITE);
-        userInfo.setFont(new Font("Tahoma", Font.PLAIN, 12));
+                employee.getFirstName() + " (" + employee.getRole() + ")");
+        userInfo.setForeground(UITheme.TEXT_SIDEBAR);
+        userInfo.setFont(UITheme.FONT_BODY);
         userInfo.setHorizontalAlignment(SwingConstants.RIGHT);
 
         add(title, BorderLayout.WEST);

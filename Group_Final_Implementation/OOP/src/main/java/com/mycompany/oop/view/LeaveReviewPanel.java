@@ -5,6 +5,7 @@
 package com.mycompany.oop.view;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
@@ -16,18 +17,18 @@ public class LeaveReviewPanel extends JPanel {
     private LeaveService service;
     private JTable table;
 
-    public LeaveReviewPanel(){
+    public LeaveReviewPanel() {
 
         service = new LeaveService();
 
         setLayout(new BorderLayout());
-        setBackground(UITheme.MAIN_GRAY);
+        setBackground(UITheme.BG);
 
         add(UITheme.createTitleBar("Leave Approval Center"), BorderLayout.NORTH);
 
-        JPanel content = UITheme.createInsetPanel();
-        content.setLayout(new BorderLayout());
-        content.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
+        JPanel content = new JPanel(new BorderLayout());
+        content.setBackground(UITheme.BG);
+        content.setBorder(new EmptyBorder(16, 20, 16, 20));
 
         content.add(createTablePanel(), BorderLayout.CENTER);
         content.add(createButtonPanel(), BorderLayout.SOUTH);
@@ -35,25 +36,17 @@ public class LeaveReviewPanel extends JPanel {
         add(content, BorderLayout.CENTER);
     }
 
-    // ================= TABLE =================
-    private JScrollPane createTablePanel(){
+    private JScrollPane createTablePanel() {
 
         table = new JTable();
-        table.setRowHeight(26);
-        table.setFont(new Font("Tahoma", Font.PLAIN, 12));
-        table.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 12));
-        table.setSelectionBackground(new Color(0,0,128));
-        table.setSelectionForeground(Color.WHITE);
+        UITheme.styleTable(table);
 
         refreshTable();
 
-        JScrollPane scroll = new JScrollPane(table);
-        scroll.setBorder(BorderFactory.createLoweredBevelBorder());
-
-        return scroll;
+        return UITheme.createTableScrollPane(table);
     }
 
-    private void refreshTable(){
+    private void refreshTable() {
 
         List<Leave> leaves = service.getAllLeaves();
 
@@ -69,10 +62,8 @@ public class LeaveReviewPanel extends JPanel {
 
         Object[][] data = new Object[leaves.size()][7];
 
-        for(int i=0;i<leaves.size();i++){
-
+        for (int i = 0; i < leaves.size(); i++) {
             Leave l = leaves.get(i);
-
             data[i][0] = l.getLeaveId();
             data[i][1] = l.getEmployeeId();
             data[i][2] = l.getLeaveType();
@@ -82,9 +73,9 @@ public class LeaveReviewPanel extends JPanel {
             data[i][6] = l.getStatus();
         }
 
-        DefaultTableModel model = new DefaultTableModel(data, cols){
+        DefaultTableModel model = new DefaultTableModel(data, cols) {
             @Override
-            public boolean isCellEditable(int row, int column){
+            public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
@@ -92,17 +83,16 @@ public class LeaveReviewPanel extends JPanel {
         table.setModel(model);
     }
 
-    // ================= BUTTONS =================
-    private JPanel createButtonPanel(){
+    private JPanel createButtonPanel() {
 
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT,10,10));
-        panel.setBackground(UITheme.MAIN_GRAY);
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
+        panel.setBackground(UITheme.BG);
 
-        JButton approveBtn = UITheme.createButton("Approve");
-        JButton rejectBtn = UITheme.createAccentButton("Reject");
+        JButton approveBtn = UITheme.createAccentButton("Approve");
+        JButton rejectBtn = UITheme.createCrudDangerButton("Reject");
 
-        approveBtn.setPreferredSize(new Dimension(100,32));
-        rejectBtn.setPreferredSize(new Dimension(100,32));
+        approveBtn.setPreferredSize(new Dimension(110, 34));
+        rejectBtn.setPreferredSize(new Dimension(110, 34));
 
         approveBtn.addActionListener(e -> updateStatus("APPROVED"));
         rejectBtn.addActionListener(e -> updateStatus("REJECTED"));
@@ -113,19 +103,45 @@ public class LeaveReviewPanel extends JPanel {
         return panel;
     }
 
-    private void updateStatus(String status){
+    private void updateStatus(String status) {
 
         int row = table.getSelectedRow();
-        if(row == -1) return;
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Please select a leave request first.",
+                    "No Selection",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-        int leaveId = Integer.parseInt(
-                table.getValueAt(row,0).toString());
+        int leaveId = Integer.parseInt(table.getValueAt(row, 0).toString());
+        String currentStatus = table.getValueAt(row, 6).toString();
 
-        if(status.equals("APPROVED")){
+        if (!"PENDING".equalsIgnoreCase(currentStatus)) {
+            JOptionPane.showMessageDialog(this,
+                    "This leave has already been " + currentStatus.toLowerCase() + ".",
+                    "Already Processed",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to " + status.toLowerCase() + " this leave request?",
+                "Confirm Action",
+                JOptionPane.YES_NO_OPTION);
+
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        if ("APPROVED".equals(status)) {
             service.approveLeave(leaveId);
         } else {
             service.rejectLeave(leaveId);
         }
+
+        JOptionPane.showMessageDialog(this,
+                "Leave request " + status.toLowerCase() + " successfully.");
 
         refreshTable();
     }

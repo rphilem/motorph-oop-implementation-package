@@ -5,7 +5,10 @@
 package com.mycompany.oop.view;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import com.mycompany.oop.model.Employee;
 
 public class MainAppFrame extends JFrame {
@@ -13,6 +16,9 @@ public class MainAppFrame extends JFrame {
     private Employee employee;
     private JPanel contentPanel;
     private CardLayout cardLayout;
+
+    private List<JButton> navButtons = new ArrayList<>();
+    private JButton activeButton;
 
     // Keep panel references so we can refresh specific tabs safely
     private HRPanel hrPanel;
@@ -31,38 +37,60 @@ public class MainAppFrame extends JFrame {
         this.employee = employee;
 
         setTitle("MotorPH Payroll System");
-        setSize(1200, 700);
+        setSize(1200, 750);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        getContentPane().setBackground(UITheme.MAIN_GRAY);
+        getContentPane().setBackground(UITheme.BG);
         getRootPane().setDefaultButton(null);
-
-        // ===== TOP TITLE BAR =====
-        add(UITheme.createTitleBar("MotorPH Payroll System"), BorderLayout.NORTH);
 
         // ===== SIDEBAR =====
         JPanel sidebar = new JPanel();
-        sidebar.setPreferredSize(new Dimension(240, 0));
-        sidebar.setBackground(new Color(205, 205, 205));
+        sidebar.setPreferredSize(new Dimension(230, 0));
+        sidebar.setBackground(UITheme.SIDEBAR_BG);
         sidebar.setLayout(new BorderLayout());
 
+        JPanel brandPanel = new JPanel();
+        brandPanel.setBackground(UITheme.SIDEBAR_BG);
+        brandPanel.setLayout(new BoxLayout(brandPanel, BoxLayout.Y_AXIS));
+        brandPanel.setBorder(new EmptyBorder(28, 22, 16, 22));
+
         JLabel logo = new JLabel("MotorPH");
-        logo.setFont(new Font("Tahoma", Font.BOLD, 18));
-        logo.setHorizontalAlignment(SwingConstants.CENTER);
-        logo.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
-        sidebar.add(logo, BorderLayout.NORTH);
+        logo.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        logo.setForeground(UITheme.ACCENT);
+        logo.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel userLabel = new JLabel(
+                employee.getFirstName() + " • " + employee.getRole()
+        );
+        userLabel.setFont(UITheme.FONT_SMALL);
+        userLabel.setForeground(UITheme.TEXT_SIDEBAR);
+        userLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        brandPanel.add(logo);
+        brandPanel.add(Box.createVerticalStrut(6));
+        brandPanel.add(userLabel);
+
+        sidebar.add(brandPanel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setBackground(new Color(205, 205, 205));
+        buttonPanel.setBackground(UITheme.SIDEBAR_BG);
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+        buttonPanel.setBorder(new EmptyBorder(8, 8, 12, 8));
+
+        JSeparator sep = new JSeparator();
+        sep.setForeground(new Color(35, 55, 95));
+        sep.setBackground(UITheme.SIDEBAR_BG);
+        sep.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+        buttonPanel.add(sep);
+        buttonPanel.add(Box.createVerticalStrut(12));
+
         sidebar.add(buttonPanel, BorderLayout.CENTER);
 
         // ===== CONTENT AREA =====
         cardLayout = new CardLayout();
-        contentPanel = UITheme.createInsetPanel();
-        contentPanel.setLayout(cardLayout);
+        contentPanel = new JPanel(cardLayout);
+        contentPanel.setBackground(UITheme.BG);
 
         dashboardPanel = new DashboardPanel(employee);
         hrPanel = new HRPanel();
@@ -86,10 +114,13 @@ public class MainAppFrame extends JFrame {
         contentPanel.add(itPanel, "IT");
         contentPanel.add(payrollHistoryPanel, "PAYROLL_HISTORY");
 
+        add(sidebar, BorderLayout.WEST);
         add(contentPanel, BorderLayout.CENTER);
 
         // ===== NAVIGATION BUTTONS =====
         String role = employee.getRole();
+
+        addNavButton(buttonPanel, "Dashboard", "DASH");
 
         if ("Admin".equals(role)) {
             addNavButton(buttonPanel, "Employees", "EMP");
@@ -101,6 +132,7 @@ public class MainAppFrame extends JFrame {
 
         if ("HR".equals(role)) {
             addNavButton(buttonPanel, "Employees", "EMP");
+            addNavButton(buttonPanel, "Payroll History", "PAYROLL_HISTORY");
             addNavButton(buttonPanel, "Leave Review", "LEAVE");
         }
 
@@ -120,9 +152,12 @@ public class MainAppFrame extends JFrame {
             addNavButton(buttonPanel, "User Management", "IT");
         }
 
+        if (!navButtons.isEmpty()) {
+            setActiveButton(navButtons.get(0));
+        }
+
         buttonPanel.add(Box.createVerticalGlue());
 
-        // ===== LOGOUT BUTTON =====
         JButton logoutBtn = UITheme.createSidebarDangerButton("Logout");
         logoutBtn.addActionListener(e -> {
             dispose();
@@ -131,86 +166,101 @@ public class MainAppFrame extends JFrame {
         });
 
         buttonPanel.add(logoutBtn);
-        buttonPanel.add(Box.createVerticalStrut(15));
+        buttonPanel.add(Box.createVerticalStrut(12));
 
-        add(sidebar, BorderLayout.WEST);
-
-        // Optional default view
         cardLayout.show(contentPanel, "DASH");
     }
 
     private void addNavButton(JPanel panel, String text, String card) {
-        panel.add(createSidebarButton(text, card));
-        panel.add(Box.createVerticalStrut(10));
-    }
-
-    private JButton createSidebarButton(String text, String card) {
-
         JButton btn = UITheme.createSidebarButton(text);
+        navButtons.add(btn);
 
         btn.addActionListener(e -> {
-
-            // Refresh panels that need updated CSV-backed data
-            if ("EMP".equals(card)) {
-                contentPanel.remove(hrPanel);
-                hrPanel = new HRPanel();
-                contentPanel.add(hrPanel, "EMP");
-            }
-
-            if ("IT".equals(card)) {
-                contentPanel.remove(itPanel);
-                itPanel = new ITPanel();
-                contentPanel.add(itPanel, "IT");
-            }
-
-            if ("PAYROLL".equals(card)) {
-                contentPanel.remove(payrollPanel);
-                payrollPanel = new PayrollPanel();
-                contentPanel.add(payrollPanel, "PAYROLL");
-            }
-
-            if ("PAYROLL_HISTORY".equals(card)) {
-                contentPanel.remove(payrollHistoryPanel);
-                payrollHistoryPanel = new HRPayrollHistoryPanel();
-                contentPanel.add(payrollHistoryPanel, "PAYROLL_HISTORY");
-            }
-
-            if ("PROFILE".equals(card)) {
-                contentPanel.remove(employeePanel);
-                employeePanel = new EmployeePanel(employee);
-                contentPanel.add(employeePanel, "PROFILE");
-            }
-
-            if ("ATTENDANCE".equals(card)) {
-                contentPanel.remove(attendancePanel);
-                attendancePanel = new AttendancePanel(employee);
-                contentPanel.add(attendancePanel, "ATTENDANCE");
-            }
-
-            if ("PAYSLIP".equals(card)) {
-                contentPanel.remove(payslipPanel);
-                payslipPanel = new PayslipPanel(employee);
-                contentPanel.add(payslipPanel, "PAYSLIP");
-            }
-
-            if ("FILE".equals(card)) {
-                contentPanel.remove(leavePanel);
-                leavePanel = new LeavePanel(employee);
-                contentPanel.add(leavePanel, "FILE");
-            }
-
-            if ("LEAVE".equals(card)) {
-                contentPanel.remove(leaveReviewPanel);
-                leaveReviewPanel = new LeaveReviewPanel();
-                contentPanel.add(leaveReviewPanel, "LEAVE");
-            }
-
+            refreshPanel(card);
             contentPanel.revalidate();
             contentPanel.repaint();
             cardLayout.show(contentPanel, card);
+            setActiveButton(btn);
         });
 
-        return btn;
+        panel.add(btn);
+        panel.add(Box.createVerticalStrut(4));
+    }
+
+    private void refreshPanel(String card) {
+
+        if ("EMP".equals(card)) {
+            contentPanel.remove(hrPanel);
+            hrPanel = new HRPanel();
+            contentPanel.add(hrPanel, "EMP");
+        }
+
+        if ("IT".equals(card)) {
+            contentPanel.remove(itPanel);
+            itPanel = new ITPanel();
+            contentPanel.add(itPanel, "IT");
+        }
+
+        if ("PAYROLL".equals(card)) {
+            contentPanel.remove(payrollPanel);
+            payrollPanel = new PayrollPanel();
+            contentPanel.add(payrollPanel, "PAYROLL");
+        }
+
+        if ("PAYROLL_HISTORY".equals(card)) {
+            contentPanel.remove(payrollHistoryPanel);
+            payrollHistoryPanel = new HRPayrollHistoryPanel();
+            contentPanel.add(payrollHistoryPanel, "PAYROLL_HISTORY");
+        }
+
+        if ("PROFILE".equals(card)) {
+            contentPanel.remove(employeePanel);
+            employeePanel = new EmployeePanel(employee);
+            contentPanel.add(employeePanel, "PROFILE");
+        }
+
+        if ("ATTENDANCE".equals(card)) {
+            contentPanel.remove(attendancePanel);
+            attendancePanel = new AttendancePanel(employee);
+            contentPanel.add(attendancePanel, "ATTENDANCE");
+        }
+
+        if ("PAYSLIP".equals(card)) {
+            contentPanel.remove(payslipPanel);
+            payslipPanel = new PayslipPanel(employee);
+            contentPanel.add(payslipPanel, "PAYSLIP");
+        }
+
+        if ("FILE".equals(card)) {
+            contentPanel.remove(leavePanel);
+            leavePanel = new LeavePanel(employee);
+            contentPanel.add(leavePanel, "FILE");
+        }
+
+        if ("LEAVE".equals(card)) {
+            contentPanel.remove(leaveReviewPanel);
+            leaveReviewPanel = new LeaveReviewPanel();
+            contentPanel.add(leaveReviewPanel, "LEAVE");
+        }
+
+        if ("DASH".equals(card)) {
+            contentPanel.remove(dashboardPanel);
+            dashboardPanel = new DashboardPanel(employee);
+            contentPanel.add(dashboardPanel, "DASH");
+        }
+    }
+
+    private void setActiveButton(JButton selected) {
+        for (JButton btn : navButtons) {
+            btn.putClientProperty("sidebar.active", false);
+            btn.setBackground(UITheme.SIDEBAR_BG);
+            btn.setForeground(UITheme.TEXT_SIDEBAR);
+        }
+
+        activeButton = selected;
+        activeButton.putClientProperty("sidebar.active", true);
+        activeButton.setBackground(UITheme.SIDEBAR_HOVER);
+        activeButton.setForeground(Color.WHITE);
     }
 }
 

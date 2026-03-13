@@ -9,8 +9,12 @@ import com.mycompany.oop.model.Employee;
 import com.mycompany.oop.service.AttendanceService;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Duration;
 import java.util.List;
 
 public class AttendancePanel extends JPanel {
@@ -29,13 +33,13 @@ public class AttendancePanel extends JPanel {
         this.attendanceService = new AttendanceService();
 
         setLayout(new BorderLayout());
-        setBackground(UITheme.MAIN_GRAY);
+        setBackground(UITheme.BG);
 
         add(UITheme.createTitleBar("My Attendance"), BorderLayout.NORTH);
 
-        JPanel content = UITheme.createInsetPanel();
-        content.setLayout(new BorderLayout());
-        content.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+        JPanel content = new JPanel(new BorderLayout());
+        content.setBackground(UITheme.BG);
+        content.setBorder(new EmptyBorder(16, 20, 16, 20));
 
         content.add(createTodayPanel(), BorderLayout.NORTH);
         content.add(createHistoryPanel(), BorderLayout.CENTER);
@@ -51,27 +55,28 @@ public class AttendancePanel extends JPanel {
         panel.setBackground(Color.WHITE);
         panel.setBorder(
                 BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(210,210,210)),
-                        BorderFactory.createEmptyBorder(20,20,20,20)
+                        BorderFactory.createLineBorder(UITheme.BORDER),
+                        new EmptyBorder(18, 22, 18, 22)
                 )
         );
 
         JLabel title = new JLabel("Today's Attendance");
-        title.setFont(new Font("Tahoma", Font.BOLD, 16));
+        title.setFont(UITheme.FONT_SECTION);
+        title.setForeground(UITheme.TEXT_PRIMARY);
+        title.setBorder(new EmptyBorder(0, 0, 10, 0));
 
         statusLabel = new JLabel("Not clocked in today");
-        statusLabel.setFont(new Font("Tahoma", Font.BOLD, 13));
-        statusLabel.setForeground(new Color(170, 40, 40));
-        statusLabel.setBorder(BorderFactory.createEmptyBorder(10,0,15,0));
+        statusLabel.setFont(UITheme.FONT_BODY_BOLD);
+        statusLabel.setForeground(UITheme.DANGER);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
         buttonPanel.setBackground(Color.WHITE);
 
         timeInBtn = UITheme.createAccentButton("Time In");
         timeOutBtn = UITheme.createButton("Time Out");
 
-        timeInBtn.setPreferredSize(new Dimension(120, 35));
-        timeOutBtn.setPreferredSize(new Dimension(120, 35));
+        timeInBtn.setPreferredSize(new Dimension(120, 36));
+        timeOutBtn.setPreferredSize(new Dimension(120, 36));
 
         timeInBtn.addActionListener(e -> {
             attendanceService.timeIn(employee.getEmployeeId());
@@ -86,30 +91,29 @@ public class AttendancePanel extends JPanel {
         buttonPanel.add(timeInBtn);
         buttonPanel.add(timeOutBtn);
 
-        JPanel top = new JPanel();
-        top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
-        top.setBackground(Color.WHITE);
+        JPanel topSection = new JPanel(new BorderLayout());
+        topSection.setBackground(Color.WHITE);
+        topSection.add(title, BorderLayout.NORTH);
+        topSection.add(statusLabel, BorderLayout.CENTER);
 
-        top.add(title);
-        top.add(statusLabel);
-        top.add(buttonPanel);
+        panel.add(topSection, BorderLayout.NORTH);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
 
-        panel.add(top, BorderLayout.CENTER);
+        JPanel outerWrapper = new JPanel(new BorderLayout());
+        outerWrapper.setBackground(UITheme.BG);
+        outerWrapper.setBorder(new EmptyBorder(0, 0, 16, 0));
+        outerWrapper.add(panel, BorderLayout.CENTER);
 
-        return panel;
+        return outerWrapper;
     }
 
     private JScrollPane createHistoryPanel() {
 
         table = new JTable();
-        table.setRowHeight(26);
-        table.setFont(new Font("Tahoma", Font.PLAIN, 12));
-        table.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 12));
-        table.setSelectionBackground(new Color(0,0,128));
-        table.setSelectionForeground(Color.WHITE);
+        UITheme.styleTable(table);
 
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(20,0,0,0));
+        JScrollPane scrollPane = UITheme.createTableScrollPane(table);
+        refreshAttendance();
 
         return scrollPane;
     }
@@ -119,14 +123,17 @@ public class AttendancePanel extends JPanel {
         List<AttendanceRecord> history =
                 attendanceService.getAttendanceHistory(employee.getEmployeeId());
 
-        String[] columns = {"Date", "Time In", "Time Out"};
-        Object[][] data = new Object[history.size()][3];
+        String[] columns = {"Date", "Time In", "Time Out", "Hours Worked"};
+        Object[][] data = new Object[history.size()][4];
 
         for (int i = 0; i < history.size(); i++) {
             AttendanceRecord record = history.get(i);
             data[i][0] = record.getDate();
             data[i][1] = record.getTimeIn();
-            data[i][2] = record.getTimeOut();
+            data[i][2] = (record.getTimeOut() == null || record.getTimeOut().isEmpty())
+                    ? "--"
+                    : record.getTimeOut();
+            data[i][3] = String.format("%.2f", calculateHoursWorked(record));
         }
 
         DefaultTableModel model = new DefaultTableModel(data, columns) {
@@ -140,16 +147,14 @@ public class AttendancePanel extends JPanel {
 
         if (history.isEmpty()) {
             statusLabel.setText("Not clocked in today");
-            statusLabel.setForeground(new Color(170, 40, 40));
+            statusLabel.setForeground(UITheme.DANGER);
             timeInBtn.setEnabled(true);
             timeOutBtn.setEnabled(false);
             return;
         }
 
         AttendanceRecord latest = history.get(history.size() - 1);
-
-        java.time.LocalDate today = java.time.LocalDate.now();
-        String todayStr = today.toString();
+        String todayStr = LocalDate.now().toString();
 
         if (latest.getDate().equals(todayStr)) {
 
@@ -157,29 +162,51 @@ public class AttendancePanel extends JPanel {
                     && (latest.getTimeOut() == null || latest.getTimeOut().isEmpty())) {
 
                 statusLabel.setText("Timed in today at " + latest.getTimeIn());
-                statusLabel.setForeground(new Color(30,120,30));
+                statusLabel.setForeground(UITheme.SUCCESS);
                 timeInBtn.setEnabled(false);
                 timeOutBtn.setEnabled(true);
 
             } else if (latest.getTimeOut() != null && !latest.getTimeOut().isEmpty()) {
 
-                statusLabel.setText("Completed attendance for today");
-                statusLabel.setForeground(new Color(30,120,30));
+                statusLabel.setText("Done for today (" +
+                        latest.getTimeIn() + " - " + latest.getTimeOut() + ")");
+                statusLabel.setForeground(UITheme.TEXT_SECONDARY);
                 timeInBtn.setEnabled(false);
                 timeOutBtn.setEnabled(false);
 
             } else {
                 statusLabel.setText("Not clocked in today");
-                statusLabel.setForeground(new Color(170, 40, 40));
+                statusLabel.setForeground(UITheme.DANGER);
                 timeInBtn.setEnabled(true);
                 timeOutBtn.setEnabled(false);
             }
 
         } else {
             statusLabel.setText("Not clocked in today");
-            statusLabel.setForeground(new Color(170, 40, 40));
+            statusLabel.setForeground(UITheme.DANGER);
             timeInBtn.setEnabled(true);
             timeOutBtn.setEnabled(false);
+        }
+    }
+
+    private double calculateHoursWorked(AttendanceRecord record) {
+        try {
+            if (record.getTimeIn() == null || record.getTimeIn().isEmpty()
+                    || record.getTimeOut() == null || record.getTimeOut().isEmpty()) {
+                return 0.0;
+            }
+
+            LocalTime in = LocalTime.parse(record.getTimeIn());
+            LocalTime out = LocalTime.parse(record.getTimeOut());
+
+            long minutes = Duration.between(in, out).toMinutes();
+            if (minutes < 0) {
+                return 0.0;
+            }
+
+            return minutes / 60.0;
+        } catch (Exception e) {
+            return 0.0;
         }
     }
 }

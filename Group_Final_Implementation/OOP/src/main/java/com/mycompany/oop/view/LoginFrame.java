@@ -5,6 +5,7 @@
 package com.mycompany.oop.view;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import com.mycompany.oop.service.LoginService;
 import com.mycompany.oop.model.Employee;
@@ -20,90 +21,80 @@ public class LoginFrame extends JFrame {
         loginService = new LoginService();
 
         setTitle("MotorPH Payroll System");
-        setSize(420,280);
+        setSize(460, 440);
         setResizable(false);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
-        getContentPane().setBackground(UITheme.MAIN_GRAY);
+        getContentPane().setBackground(UITheme.BG);
 
-        add(UITheme.createTitleBar("MotorPH Payroll System"), BorderLayout.NORTH);
+        setLayout(new GridBagLayout());
 
-        // ===== CENTER WRAPPER =====
-        JPanel wrapper = new JPanel(new GridBagLayout());
-        wrapper.setBackground(UITheme.MAIN_GRAY);
+        JPanel loginCard = new JPanel(new GridBagLayout());
+        loginCard.setBackground(Color.WHITE);
+        loginCard.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(UITheme.BORDER),
+                new EmptyBorder(36, 44, 32, 44)
+        ));
 
-        JPanel loginCard = UITheme.createInsetPanel();
-        loginCard.setLayout(new GridBagLayout());
-        loginCard.setPreferredSize(new Dimension(320,180));
-        loginCard.setBorder(BorderFactory.createEmptyBorder(20,25,20,25));
-
-        wrapper.add(loginCard);
-        add(wrapper, BorderLayout.CENTER);
-
-        // ===== GRID CONFIG =====
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8,8,8,8);
-
-        usernameField = new JTextField();
-        passwordField = new JPasswordField();
-
-        styleField(usernameField);
-        styleField(passwordField);
-
-        // USERNAME
-        gbc.gridx = 0; gbc.gridy = 0;
-        gbc.weightx = 0;
-        gbc.anchor = GridBagConstraints.WEST;
-        loginCard.add(createLabel("Username:"), gbc);
-
-        gbc.gridx = 1;
-        gbc.weightx = 1.0;
+        gbc.gridx = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
+
+        gbc.gridy = 0;
+        gbc.insets = new Insets(0, 0, 2, 0);
+        JLabel brandLabel = new JLabel("MotorPH", SwingConstants.CENTER);
+        brandLabel.setFont(new Font("Segoe UI", Font.BOLD, 30));
+        brandLabel.setForeground(UITheme.ACCENT);
+        loginCard.add(brandLabel, gbc);
+
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 0, 28, 0);
+        JLabel subtitleLabel = new JLabel("Payroll System", SwingConstants.CENTER);
+        subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        subtitleLabel.setForeground(UITheme.TEXT_SECONDARY);
+        loginCard.add(subtitleLabel, gbc);
+
+        gbc.gridy = 2;
+        gbc.insets = new Insets(0, 0, 6, 0);
+        JLabel userLabel = new JLabel("Username");
+        userLabel.setFont(UITheme.FONT_BODY_BOLD);
+        userLabel.setForeground(UITheme.TEXT_PRIMARY);
+        loginCard.add(userLabel, gbc);
+
+        gbc.gridy = 3;
+        gbc.insets = new Insets(0, 0, 16, 0);
+        usernameField = new JTextField();
+        usernameField.setFont(UITheme.FONT_BODY);
+        usernameField.setPreferredSize(new Dimension(280, 36));
         loginCard.add(usernameField, gbc);
 
-        // PASSWORD
-        gbc.gridx = 0; gbc.gridy = 1;
-        gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.NONE;
-        loginCard.add(createLabel("Password:"), gbc);
+        gbc.gridy = 4;
+        gbc.insets = new Insets(0, 0, 6, 0);
+        JLabel passLabel = new JLabel("Password");
+        passLabel.setFont(UITheme.FONT_BODY_BOLD);
+        passLabel.setForeground(UITheme.TEXT_PRIMARY);
+        loginCard.add(passLabel, gbc);
 
-        gbc.gridx = 1;
-        gbc.weightx = 1.0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridy = 5;
+        gbc.insets = new Insets(0, 0, 24, 0);
+        passwordField = new JPasswordField();
+        passwordField.setFont(UITheme.FONT_BODY);
+        passwordField.setPreferredSize(new Dimension(280, 36));
         loginCard.add(passwordField, gbc);
 
-        // LOGIN BUTTON (full width clean)
-        JButton loginBtn = UITheme.createAccentButton("Login");
-        loginBtn.setPreferredSize(new Dimension(0,32));
+        gbc.gridy = 6;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        JButton loginBtn = UITheme.createAccentButton("Sign In");
+        loginBtn.setPreferredSize(new Dimension(280, 40));
         loginBtn.addActionListener(e -> login());
-
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        gbc.weightx = 1.0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
         loginCard.add(loginBtn, gbc);
 
+        add(loginCard);
+
         getRootPane().setDefaultButton(loginBtn);
-
     }
 
-    // ===== LABEL STYLE =====
-    private JLabel createLabel(String text){
-        JLabel lbl = new JLabel(text);
-        lbl.setFont(new Font("Tahoma", Font.BOLD, 12));
-        return lbl;
-    }
-
-    // ===== FIELD STYLE =====
-    private void styleField(JTextField field){
-        field.setFont(new Font("Tahoma", Font.PLAIN, 12));
-        field.setBackground(Color.WHITE);
-        field.setBorder(BorderFactory.createLineBorder(new Color(170,170,170)));
-    }
-
-    // ===== LOGIN LOGIC =====
     private void login() {
 
         String username = usernameField.getText().trim();
@@ -127,7 +118,6 @@ public class LoginFrame extends JFrame {
             return;
         }
 
-        // Success case only
         dispose();
         MainAppFrame frame = new MainAppFrame(emp);
         frame.setVisible(true);

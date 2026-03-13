@@ -5,6 +5,7 @@
 package com.mycompany.oop.view;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.text.NumberFormat;
 import java.util.List;
@@ -18,7 +19,6 @@ public class PayslipPanel extends JPanel {
 
     private PayrollService payrollService;
 
-    // ================= VALUE LABELS =================
     private JLabel basicValue;
     private JLabel allowanceValue;
     private JLabel grossValue;
@@ -37,15 +37,14 @@ public class PayslipPanel extends JPanel {
         payrollService = new PayrollService();
 
         setLayout(new BorderLayout());
-        setBackground(UITheme.MAIN_GRAY);
+        setBackground(UITheme.BG);
 
         add(UITheme.createTitleBar("My Payslip History"), BorderLayout.NORTH);
 
-        JPanel content = UITheme.createInsetPanel();
-        content.setLayout(new BorderLayout());
-        content.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        JPanel content = new JPanel(new BorderLayout());
+        content.setBackground(UITheme.BG);
+        content.setBorder(new EmptyBorder(20, 24, 20, 24));
 
-        // ================= FETCH HISTORY =================
         List<PayrollHistoryRecord> history =
                 payrollService.getPayrollHistoryForEmployee(employee.getEmployeeId());
 
@@ -54,14 +53,22 @@ public class PayslipPanel extends JPanel {
             cutoffBox.addItem(r.getCutoffPeriod());
         }
 
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
         topPanel.setBackground(Color.WHITE);
-        topPanel.add(new JLabel("Select Cutoff: "));
+        topPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(UITheme.BORDER),
+                new EmptyBorder(8, 12, 8, 12)
+        ));
+
+        JLabel selectLabel = new JLabel("Select Cutoff:");
+        selectLabel.setFont(UITheme.FONT_BODY_BOLD);
+        selectLabel.setForeground(UITheme.TEXT_PRIMARY);
+
+        topPanel.add(selectLabel);
         topPanel.add(cutoffBox);
 
         content.add(topPanel, BorderLayout.NORTH);
 
-        // ================= BREAKDOWN PANEL =================
         JPanel breakdownPanel = new JPanel(new GridBagLayout());
         breakdownPanel.setBackground(Color.WHITE);
 
@@ -69,7 +76,6 @@ public class PayslipPanel extends JPanel {
         gbc.insets = new Insets(8, 20, 8, 20);
         gbc.anchor = GridBagConstraints.WEST;
 
-        // Initialize value labels
         basicValue = createValueLabelBold();
         allowanceValue = createValueLabelBold();
         grossValue = createValueLabelBold();
@@ -81,24 +87,23 @@ public class PayslipPanel extends JPanel {
         totalValue = createValueLabelBold();
 
         netValue = createValueLabelBold();
+
         takeHomeValue = new JLabel("₱ 0.00");
-        takeHomeValue.setFont(new Font("Tahoma", Font.BOLD, 20));
+        takeHomeValue.setFont(new Font("Segoe UI", Font.BOLD, 20));
         takeHomeValue.setForeground(new Color(0, 102, 51));
         takeHomeValue.setHorizontalAlignment(SwingConstants.CENTER);
 
-        // ================= EMPLOYEE DETAILS =================
         JLabel employeeNameLabel = new JLabel(
                 "Employee: " + employee.getFirstName() + " " + employee.getLastName());
-        employeeNameLabel.setFont(new Font("Tahoma", Font.PLAIN, 12));
+        employeeNameLabel.setFont(UITheme.FONT_BODY);
 
         JLabel employeeIdLabel = new JLabel(
                 "Employee ID: " + employee.getEmployeeId());
-        employeeIdLabel.setFont(new Font("Tahoma", Font.PLAIN, 12));
+        employeeIdLabel.setFont(UITheme.FONT_BODY);
 
         JLabel cutoffLabel = new JLabel("Cutoff Period: ");
-        cutoffLabel.setFont(new Font("Tahoma", Font.PLAIN, 12));
+        cutoffLabel.setFont(UITheme.FONT_BODY);
 
-        // ================= EARNINGS =================
         addSectionTitle(breakdownPanel, gbc, 0, "EARNINGS");
         addRow(breakdownPanel, gbc, 1, "Basic Salary (Semi-Monthly)", basicValue);
         addRow(breakdownPanel, gbc, 2, "Allowance (Semi-Monthly)", allowanceValue);
@@ -106,7 +111,6 @@ public class PayslipPanel extends JPanel {
 
         addDivider(breakdownPanel, gbc, 4);
 
-        // ================= DEDUCTIONS =================
         addSectionTitle(breakdownPanel, gbc, 5, "DEDUCTIONS");
         addRow(breakdownPanel, gbc, 6, "SSS", sssValue);
         addRow(breakdownPanel, gbc, 7, "PhilHealth", philhealthValue);
@@ -116,53 +120,51 @@ public class PayslipPanel extends JPanel {
 
         addDivider(breakdownPanel, gbc, 11);
 
-        // ================= NET PAY =================
         addSectionTitle(breakdownPanel, gbc, 12, "NET PAY");
         addRow(breakdownPanel, gbc, 13, "Net Salary", netValue);
 
-        // ================= TAKE HOME PAY BOX =================
         JPanel takeHomePanel = new JPanel(new BorderLayout());
         takeHomePanel.setBackground(new Color(245, 245, 245));
         takeHomePanel.setBorder(
                 BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(210, 210, 210)),
-                        BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                        BorderFactory.createLineBorder(UITheme.BORDER),
+                        new EmptyBorder(10, 10, 10, 10)
                 )
         );
 
         JLabel takeHomeTitle = new JLabel("TAKE HOME PAY", SwingConstants.CENTER);
-        takeHomeTitle.setFont(new Font("Tahoma", Font.BOLD, 13));
+        takeHomeTitle.setFont(UITheme.FONT_BODY_BOLD);
+        takeHomeTitle.setForeground(UITheme.TEXT_PRIMARY);
 
         takeHomePanel.add(takeHomeTitle, BorderLayout.NORTH);
         takeHomePanel.add(takeHomeValue, BorderLayout.CENTER);
 
-        // ================= CONFIDENTIAL NOTICE =================
         JLabel confidentialLabel = new JLabel(
                 "<html><center><i>CONFIDENTIAL: This document contains sensitive payroll information intended solely for the employee. Unauthorized disclosure is strictly prohibited.</i></center></html>"
         );
-        confidentialLabel.setFont(new Font("Tahoma", Font.PLAIN, 10));
-        confidentialLabel.setForeground(new Color(120, 120, 120));
+        confidentialLabel.setFont(UITheme.FONT_SMALL);
+        confidentialLabel.setForeground(UITheme.TEXT_SECONDARY);
         confidentialLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        confidentialLabel.setBorder(BorderFactory.createEmptyBorder(15, 10, 10, 10));
+        confidentialLabel.setBorder(new EmptyBorder(15, 10, 10, 10));
 
-        // ================= WRAPPER =================
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setBackground(Color.WHITE);
         wrapper.setBorder(
                 BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(210, 210, 210)),
-                        BorderFactory.createEmptyBorder(15, 30, 15, 30)
+                        BorderFactory.createLineBorder(UITheme.BORDER),
+                        new EmptyBorder(15, 30, 15, 30)
                 )
         );
 
         JLabel headerLabel = new JLabel("MotorPH Payroll Payslip", SwingConstants.CENTER);
-        headerLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
-        headerLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        headerLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        headerLabel.setForeground(UITheme.TEXT_PRIMARY);
+        headerLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         JPanel detailsPanel = new JPanel();
         detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
         detailsPanel.setBackground(Color.WHITE);
-        detailsPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 15, 10));
+        detailsPanel.setBorder(new EmptyBorder(0, 10, 15, 10));
         detailsPanel.add(employeeNameLabel);
         detailsPanel.add(Box.createVerticalStrut(3));
         detailsPanel.add(employeeIdLabel);
@@ -176,7 +178,7 @@ public class PayslipPanel extends JPanel {
 
         JPanel southWrapper = new JPanel(new BorderLayout());
         southWrapper.setBackground(Color.WHITE);
-        southWrapper.setBorder(BorderFactory.createEmptyBorder(20, 40, 0, 40));
+        southWrapper.setBorder(new EmptyBorder(20, 40, 0, 40));
         southWrapper.add(takeHomePanel, BorderLayout.CENTER);
 
         JPanel bottomWrapper = new JPanel(new BorderLayout());
@@ -189,35 +191,29 @@ public class PayslipPanel extends JPanel {
         wrapper.add(bottomWrapper, BorderLayout.SOUTH);
 
         JScrollPane scrollPane = new JScrollPane(wrapper);
-        scrollPane.setBorder(null);
+        scrollPane.setBorder(BorderFactory.createLineBorder(UITheme.BORDER));
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setHorizontalScrollBarPolicy(
+                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
+        );
 
         content.add(scrollPane, BorderLayout.CENTER);
-        
-        // ================= BUTTONS =================
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
-        buttonPanel.setBackground(Color.WHITE);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
+        buttonPanel.setBackground(UITheme.BG);
 
         JButton viewBtn = UITheme.createAccentButton("View Payslip");
-        JButton downloadBtn = UITheme.createButton("Download");
         JButton printBtn = UITheme.createButton("Print");
 
-        viewBtn.setPreferredSize(new Dimension(140, 35));
-        downloadBtn.setPreferredSize(new Dimension(120, 35));
-        printBtn.setPreferredSize(new Dimension(120, 35));
-
-        viewBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
-        downloadBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
-        printBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+        viewBtn.setPreferredSize(new Dimension(140, 36));
+        printBtn.setPreferredSize(new Dimension(120, 36));
 
         buttonPanel.add(viewBtn);
-        buttonPanel.add(downloadBtn);
         buttonPanel.add(printBtn);
 
         content.add(buttonPanel, BorderLayout.SOUTH);
         add(content, BorderLayout.CENTER);
 
-        // ================= DROPDOWN ACTION =================
         NumberFormat peso =
                 NumberFormat.getCurrencyInstance(new Locale("en", "PH"));
 
@@ -244,7 +240,6 @@ public class PayslipPanel extends JPanel {
             }
         });
 
-        // ================= VIEW POPUP ACTION =================
         viewBtn.addActionListener(e -> {
             int index = cutoffBox.getSelectedIndex();
 
@@ -260,7 +255,6 @@ public class PayslipPanel extends JPanel {
             }
         });
 
-        // ================= PRINT ACTION =================
         printBtn.addActionListener(e -> {
             int index = cutoffBox.getSelectedIndex();
 
@@ -282,7 +276,6 @@ public class PayslipPanel extends JPanel {
         }
     }
 
-    // ================= ROW =================
     private void addRow(JPanel panel, GridBagConstraints gbc,
                         int y, String labelText, JLabel valueLabel) {
 
@@ -291,10 +284,12 @@ public class PayslipPanel extends JPanel {
         if ("Gross Pay".equals(labelText)
                 || "Total Deductions".equals(labelText)
                 || "Net Salary".equals(labelText)) {
-            label.setFont(new Font("Tahoma", Font.BOLD, 13));
+            label.setFont(UITheme.FONT_BODY_BOLD);
         } else {
-            label.setFont(new Font("Tahoma", Font.PLAIN, 13));
+            label.setFont(UITheme.FONT_BODY);
         }
+
+        label.setForeground(UITheme.TEXT_SECONDARY);
 
         gbc.gridx = 0;
         gbc.gridy = y;
@@ -309,7 +304,6 @@ public class PayslipPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
     }
 
-    // ================= SECTION TITLE =================
     private void addSectionTitle(JPanel panel,
                                  GridBagConstraints gbc,
                                  int y,
@@ -321,15 +315,15 @@ public class PayslipPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
 
         JLabel section = new JLabel(title);
-        section.setFont(new Font("Tahoma", Font.BOLD, 14));
-        section.setBorder(BorderFactory.createEmptyBorder(8, 0, 4, 0));
+        section.setFont(UITheme.FONT_SECTION);
+        section.setForeground(UITheme.ACCENT);
+        section.setBorder(new EmptyBorder(8, 0, 4, 0));
 
         panel.add(section, gbc);
 
         gbc.gridwidth = 1;
     }
 
-    // ================= DIVIDER =================
     private void addDivider(JPanel panel,
                             GridBagConstraints gbc,
                             int y) {
@@ -347,51 +341,17 @@ public class PayslipPanel extends JPanel {
         gbc.insets = new Insets(8, 20, 8, 20);
     }
 
-    // ================= VALUE LABEL CREATOR =================
     private JLabel createValueLabelBold() {
         JLabel lbl = new JLabel("₱ 0.00");
-        lbl.setFont(new Font("Tahoma", Font.BOLD, 13));
+        lbl.setFont(UITheme.FONT_BODY_BOLD);
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
         return lbl;
     }
 
     private JLabel createValueLabelPlain() {
         JLabel lbl = new JLabel("₱ 0.00");
-        lbl.setFont(new Font("Tahoma", Font.PLAIN, 13));
+        lbl.setFont(UITheme.FONT_BODY);
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
         return lbl;
     }
 }
-
-
-
-/*
-PAYSLIP PANEL – STRUCTURED PAYROLL VIEW
-
-Purpose:
-Displays detailed payroll breakdown for individual employee.
-
-Enhancements:
-Clear separation of Earnings, Deductions, and Net Pay
-Allowance separated from deductions
-Professional payroll structure layout
-Semi-monthly breakdown visibility
-Confidentiality notice added
-Print and Download functionality included
-
-Design Improvements:
-No computation logic inside UI
-Pulls data only from PayrollHistoryRecord
-Easily extendable for:
-Approval status
-Finance sign-off
-Electronic signature
-Export to PDF
-
-Architecture:
-UI Layer → Service Layer → Repository Layer
-
-Future Enhancements:
-HR approval flow integration
-Finance approval tagging
-Payslip status tracking (Pending / Approved / Released)
-Official PDF export instead of TXT
-*/

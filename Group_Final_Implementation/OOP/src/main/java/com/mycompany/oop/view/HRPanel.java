@@ -5,6 +5,7 @@
 package com.mycompany.oop.view;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.text.NumberFormat;
@@ -23,13 +24,13 @@ public class HRPanel extends JPanel {
         service = new EmployeeService();
 
         setLayout(new BorderLayout());
-        setBackground(UITheme.MAIN_GRAY);
+        setBackground(UITheme.BG);
 
         add(UITheme.createTitleBar("Employee Management"), BorderLayout.NORTH);
 
-        JPanel content = UITheme.createInsetPanel();
-        content.setLayout(new BorderLayout());
-        content.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
+        JPanel content = new JPanel(new BorderLayout());
+        content.setBackground(UITheme.BG);
+        content.setBorder(new EmptyBorder(16, 20, 16, 20));
 
         content.add(createTable(), BorderLayout.CENTER);
         content.add(createButtonPanel(), BorderLayout.SOUTH);
@@ -37,22 +38,14 @@ public class HRPanel extends JPanel {
         add(content, BorderLayout.CENTER);
     }
 
-    // ================= TABLE =================
     private JScrollPane createTable() {
 
         table = new JTable();
-        table.setRowHeight(26);
-        table.setFont(new Font("Tahoma", Font.PLAIN, 12));
-        table.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 12));
-        table.setSelectionBackground(new Color(0,0,128));
-        table.setSelectionForeground(Color.WHITE);
+        UITheme.styleTable(table);
 
         refreshTable();
 
-        JScrollPane scroll = new JScrollPane(table);
-        scroll.setBorder(BorderFactory.createLoweredBevelBorder());
-
-        return scroll;
+        return UITheme.createTableScrollPane(table);
     }
 
     private void refreshTable() {
@@ -60,19 +53,17 @@ public class HRPanel extends JPanel {
         List<Employee> list = service.getAllEmployees();
 
         String[] columns = {
-                "ID","First Name","Last Name",
-                "Position","Status","Basic Salary","Role"
+                "ID", "First Name", "Last Name",
+                "Position", "Status", "Basic Salary", "Role"
         };
 
         NumberFormat peso = NumberFormat.getCurrencyInstance(
-                new Locale("en","PH"));
+                new Locale("en", "PH"));
 
         Object[][] data = new Object[list.size()][7];
 
         for (int i = 0; i < list.size(); i++) {
-
             Employee e = list.get(i);
-
             data[i][0] = e.getEmployeeId();
             data[i][1] = e.getFirstName();
             data[i][2] = e.getLastName();
@@ -85,26 +76,25 @@ public class HRPanel extends JPanel {
         DefaultTableModel model = new DefaultTableModel(data, columns) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // prevent direct editing
+                return false;
             }
         };
 
         table.setModel(model);
     }
 
-    // ================= BUTTONS =================
     private JPanel createButtonPanel() {
 
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT,10,10));
-        panel.setBackground(UITheme.MAIN_GRAY);
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
+        panel.setBackground(UITheme.BG);
 
         JButton addBtn = UITheme.createButton("Add");
         JButton editBtn = UITheme.createButton("Edit");
-        JButton deleteBtn = UITheme.createCrudDangerButton("Delete");   
+        JButton deleteBtn = UITheme.createCrudDangerButton("Delete");
 
-        addBtn.setPreferredSize(new Dimension(90,32));
-        editBtn.setPreferredSize(new Dimension(90,32));
-        deleteBtn.setPreferredSize(new Dimension(90,32));
+        addBtn.setPreferredSize(new Dimension(90, 34));
+        editBtn.setPreferredSize(new Dimension(90, 34));
+        deleteBtn.setPreferredSize(new Dimension(90, 34));
 
         addBtn.addActionListener(e -> openEmployeeFormDialog(null));
         editBtn.addActionListener(e -> editSelected());
@@ -117,33 +107,23 @@ public class HRPanel extends JPanel {
         return panel;
     }
 
-    // ================= EDIT =================
     private void editSelected() {
-
         int row = table.getSelectedRow();
         if (row == -1) return;
 
-        int id = Integer.parseInt(
-                table.getValueAt(row,0).toString());
-
+        int id = Integer.parseInt(table.getValueAt(row, 0).toString());
         Employee emp = service.findById(id);
-
         openEmployeeFormDialog(emp);
     }
 
-    // ================= DELETE =================
     private void deleteSelected() {
-
         int row = table.getSelectedRow();
         if (row == -1) return;
 
-        int id = Integer.parseInt(
-                table.getValueAt(row,0).toString());
+        int id = Integer.parseInt(table.getValueAt(row, 0).toString());
 
-        int confirm = JOptionPane.showConfirmDialog(
-                this,
-                "Delete this employee?",
-                "Confirm",
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Delete this employee?", "Confirm",
                 JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
@@ -152,21 +132,13 @@ public class HRPanel extends JPanel {
         }
     }
 
-    // ================= DIALOG =================
     private void openEmployeeFormDialog(Employee emp) {
-
         JFrame parent = (JFrame) SwingUtilities.getWindowAncestor(this);
 
-        // HR should NOT edit username/password/role
         boolean isAdmin = false;
 
-        EmployeeFormDialog dialog =
-                new EmployeeFormDialog(
-                        parent,
-                        service,
-                        emp,
-                        isAdmin
-                );
+        EmployeeFormDialog dialog = new EmployeeFormDialog(
+                parent, service, emp, isAdmin);
 
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);

@@ -5,6 +5,7 @@
 package com.mycompany.oop.view;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -15,74 +16,80 @@ public class EmployeePanel extends JPanel {
     private Employee employee;
 
     public EmployeePanel(Employee employee) {
-
         this.employee = employee;
 
         setLayout(new BorderLayout());
-        setBackground(UITheme.MAIN_GRAY);
+        setBackground(UITheme.BG);
 
         add(UITheme.createTitleBar("My Profile"), BorderLayout.NORTH);
 
-        JPanel content = UITheme.createInsetPanel();
-        content.setLayout(new BorderLayout());
-        content.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+        JPanel content = new JPanel(new BorderLayout());
+        content.setBackground(UITheme.BG);
+        content.setBorder(new EmptyBorder(20, 24, 20, 24));
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBackground(UITheme.BG);
 
         NumberFormat peso = NumberFormat.getCurrencyInstance(
-                new Locale("en","PH"));
+                new Locale("en", "PH"));
 
-        // ===== PERSONAL INFO SECTION =====
-        JPanel personalSection = createSection("Personal Information");
+        mainPanel.add(createSection("Personal Information", new String[][]{
+                {"Employee ID", String.valueOf(employee.getEmployeeId())},
+                {"Name", employee.getFirstName() + " " + employee.getLastName()}
+        }));
 
-        personalSection.add(createRow("Employee ID:",
-                String.valueOf(employee.getEmployeeId())));
-        personalSection.add(createRow("Name:",
-                employee.getFirstName() + " " + employee.getLastName()));
-        personalSection.add(createRow("Position:",
-                employee.getPosition()));
-        personalSection.add(createRow("Status:",
-                employee.getEmploymentStatus()));
-        personalSection.add(createRow("Role:",
-                employee.getRole()));
+        mainPanel.add(Box.createVerticalStrut(16));
 
-        // ===== SALARY SECTION =====
-        JPanel salarySection = createSection("Salary Details");
+        mainPanel.add(createSection("Employment Details", new String[][]{
+                {"Position", employee.getPosition()},
+                {"Status", employee.getEmploymentStatus()},
+                {"Role", employee.getRole()},
+                {"Username", employee.getUsername()}
+        }));
 
-        salarySection.add(createRow("Basic Salary:",
-                peso.format(employee.getBasicSalary())));
-        salarySection.add(createRow("Allowance:",
-                peso.format(employee.getAllowance())));
-        salarySection.add(createRow("Hourly Rate:",
-                peso.format(employee.getHourlyRate())));
+        mainPanel.add(Box.createVerticalStrut(16));
 
-        mainPanel.add(personalSection);
-        mainPanel.add(Box.createVerticalStrut(20));
-        mainPanel.add(salarySection);
+        mainPanel.add(createSection("Salary Details", new String[][]{
+                {"Basic Salary", peso.format(employee.getBasicSalary())},
+                {"Allowance", peso.format(employee.getAllowance())},
+                {"Hourly Rate", peso.format(employee.getHourlyRate())},
+                {"Gross Salary", peso.format(employee.computeGrossSalary())},
+                {"Net Salary", peso.format(employee.computeNetSalary())}
+        }));
 
-        content.add(mainPanel, BorderLayout.NORTH);
+        JScrollPane scroll = new JScrollPane(mainPanel);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        scroll.getViewport().setBackground(UITheme.BG);
+
+        content.add(scroll, BorderLayout.CENTER);
         add(content, BorderLayout.CENTER);
     }
 
-    // ================= SECTION BUILDER =================
-    private JPanel createSection(String title) {
-
+    private JPanel createSection(String title, String[][] rows) {
         JPanel section = new JPanel(new BorderLayout());
-        section.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createRaisedBevelBorder(),
-                BorderFactory.createEmptyBorder(10,10,10,10)
-        ));
         section.setBackground(Color.WHITE);
+        section.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(UITheme.BORDER),
+                new EmptyBorder(18, 22, 18, 22)
+        ));
+        section.setMaximumSize(new Dimension(
+                Integer.MAX_VALUE,
+                60 + rows.length * 28
+        ));
 
         JLabel lblTitle = new JLabel(title);
-        lblTitle.setFont(new Font("Tahoma", Font.BOLD, 14));
-        lblTitle.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
+        lblTitle.setFont(UITheme.FONT_SECTION);
+        lblTitle.setForeground(UITheme.TEXT_PRIMARY);
+        lblTitle.setBorder(new EmptyBorder(0, 0, 14, 0));
 
-        JPanel body = new JPanel();
-        body.setLayout(new GridLayout(0,1,5,5));
+        JPanel body = new JPanel(new GridLayout(0, 1, 0, 6));
         body.setBackground(Color.WHITE);
+
+        for (String[] row : rows) {
+            body.add(createRow(row[0], row[1]));
+        }
 
         section.add(lblTitle, BorderLayout.NORTH);
         section.add(body, BorderLayout.CENTER);
@@ -90,17 +97,17 @@ public class EmployeePanel extends JPanel {
         return section;
     }
 
-    // ================= ROW BUILDER =================
-    private JPanel createRow(String label, String value){
-
+    private JPanel createRow(String label, String value) {
         JPanel row = new JPanel(new BorderLayout());
         row.setBackground(Color.WHITE);
 
         JLabel lbl = new JLabel(label);
-        lbl.setFont(new Font("Tahoma", Font.PLAIN, 12));
+        lbl.setFont(UITheme.FONT_BODY);
+        lbl.setForeground(UITheme.TEXT_SECONDARY);
 
-        JLabel val = new JLabel(value);
-        val.setFont(new Font("Tahoma", Font.BOLD, 12));
+        JLabel val = new JLabel(value != null ? value : "N/A");
+        val.setFont(UITheme.FONT_BODY_BOLD);
+        val.setForeground(UITheme.TEXT_PRIMARY);
 
         row.add(lbl, BorderLayout.WEST);
         row.add(val, BorderLayout.EAST);

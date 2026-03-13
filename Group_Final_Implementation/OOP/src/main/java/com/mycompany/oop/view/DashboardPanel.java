@@ -5,14 +5,12 @@
 package com.mycompany.oop.view;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.text.NumberFormat;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import com.mycompany.oop.model.Employee;
-import com.mycompany.oop.model.Leave;
 import com.mycompany.oop.service.DashboardService;
 import com.mycompany.oop.model.DashboardSummary;
 
@@ -22,19 +20,27 @@ public class DashboardPanel extends JPanel {
     private JPanel cardContainer;
     private DashboardService dashboardService;
 
-    public DashboardPanel(Employee user) {
+    private static final Color[] CARD_ACCENTS = {
+            new Color(210, 43, 43),
+            new Color(37, 99, 195),
+            new Color(34, 160, 70),
+            new Color(130, 80, 210),
+            new Color(59, 130, 246),
+            new Color(185, 30, 30)
+    };
 
+    public DashboardPanel(Employee user) {
         this.user = user;
 
         setLayout(new BorderLayout());
-        setBackground(UITheme.DASHBOARD_BG);
-        setBorder(BorderFactory.createEmptyBorder(30,30,30,30));
+        setBackground(UITheme.BG);
+        setBorder(new EmptyBorder(30, 30, 30, 30));
 
         add(createHeader(), BorderLayout.NORTH);
 
         cardContainer = new JPanel();
-        cardContainer.setBackground(UITheme.DASHBOARD_BG);
-        cardContainer.setLayout(new GridLayout(0,2,25,25));
+        cardContainer.setBackground(UITheme.BG);
+        cardContainer.setLayout(new GridLayout(0, 2, 20, 20));
 
         add(cardContainer, BorderLayout.CENTER);
 
@@ -42,162 +48,128 @@ public class DashboardPanel extends JPanel {
         loadRoleDashboard();
     }
 
-    // ================= HEADER =================
-    private JPanel createHeader(){
+    private JPanel createHeader() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(UITheme.BG);
+        panel.setBorder(new EmptyBorder(0, 0, 28, 0));
 
-       JPanel panel = new JPanel(new BorderLayout());
-       panel.setBackground(UITheme.DASHBOARD_BG);
-       panel.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 0));
+        JLabel title = new JLabel("Dashboard");
+        title.setFont(UITheme.FONT_PAGE_TITLE);
+        title.setForeground(UITheme.TEXT_PRIMARY);
 
-       JLabel title = new JLabel("Dashboard");
-       title.setFont(new Font("Segoe UI", Font.BOLD, 28));
-       title.setForeground(new Color(30,30,40));
-       title.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
+        JLabel welcome = new JLabel(
+                "Welcome back, " + user.getFirstName() + " • " + user.getRole()
+        );
+        welcome.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        welcome.setForeground(UITheme.TEXT_SECONDARY);
+        welcome.setBorder(new EmptyBorder(6, 0, 0, 0));
 
-       JLabel welcome = new JLabel(
-               "Welcome back, " +
-               user.getFirstName() +
-               " (" + user.getRole() + ")"
-       );
-       welcome.setFont(new Font("Segoe UI", Font.PLAIN, 15));
-       welcome.setForeground(new Color(90,90,110));
+        panel.add(title, BorderLayout.NORTH);
+        panel.add(welcome, BorderLayout.SOUTH);
 
-       panel.add(title, BorderLayout.NORTH);
-       panel.add(welcome, BorderLayout.SOUTH);
+        return panel;
+    }
 
-       return panel;
-   }
-
-    // ================= ROLE SWITCH =================
     private void loadRoleDashboard() {
-
         switch (user.getRole()) {
-
             case "IT":
                 showITMetrics();
                 break;
-
             case "HR":
                 showHRMetrics();
                 break;
-
             case "Finance":
                 showFinanceMetrics();
                 break;
-
             case "Admin":
                 showAdminMetrics();
                 break;
-
             default:
                 showEmployeeMetrics();
         }
     }
 
-    // ================= IT =================
     private void showITMetrics() {
-
         DashboardSummary summary = dashboardService.generateSummary();
 
-        addCard("Total Users",
-                String.valueOf(summary.getTotalEmployees()));
-
-        addCard("Admin Accounts",
-                String.valueOf(summary.getAdminCount()));
-
-        addCard("HR Accounts",
-                String.valueOf(summary.getHrCount()));
-
-        addCard("Finance Accounts",
-                String.valueOf(summary.getFinanceCount()));
-
-        addCard("Employee Accounts",
-                String.valueOf(summary.getEmployeeCount()));
-
-        addCard("IT Accounts",
-                String.valueOf(summary.getItCount()));
+        addCard("Total Users", String.valueOf(summary.getTotalEmployees()), 0);
+        addCard("Admin Accounts", String.valueOf(summary.getAdminCount()), 1);
+        addCard("HR Accounts", String.valueOf(summary.getHrCount()), 2);
+        addCard("Finance Accounts", String.valueOf(summary.getFinanceCount()), 3);
+        addCard("Employee Accounts", String.valueOf(summary.getEmployeeCount()), 4);
+        addCard("IT Accounts", String.valueOf(summary.getItCount()), 5);
     }
 
-    // ================= HR =================
     private void showHRMetrics() {
-
         DashboardSummary summary = dashboardService.generateSummary();
 
-        addCard("Total Employees",
-                String.valueOf(summary.getTotalEmployees()));
-
-        addCard("Active Employees",
-                String.valueOf(summary.getActiveEmployees()));
-
-        addCard("Pending Leaves",
-                String.valueOf(summary.getPendingLeaves()));
-
-        addCard("Total Gross Payroll",
-                formatCurrency(summary.getTotalGross()));
-
-        addCard("Total Allowances",
-                formatCurrency(summary.getTotalAllowance()));
+        addCard("Total Employees", String.valueOf(summary.getTotalEmployees()), 0);
+        addCard("Active Employees", String.valueOf(summary.getActiveEmployees()), 2);
+        addCard("Pending Leaves", String.valueOf(summary.getPendingLeaves()), 3);
+        addCard("Total Gross Payroll", formatCurrency(summary.getTotalGross()), 0);
+        addCard("Total Allowances", formatCurrency(summary.getTotalAllowance()), 1);
     }
-    // ================= FINANCE =================
+
     private void showFinanceMetrics() {
-
         DashboardSummary summary = dashboardService.generateSummary();
 
-        addCard("Total Gross Payroll",
-                formatCurrency(summary.getTotalGross()));
-
-        addCard("Total Net Payroll",
-                formatCurrency(summary.getTotalNet()));
-
-        addCard("Total Deductions",
-                formatCurrency(summary.getTotalDeductions()));
-
-        addCard("Employees Paid",
-                String.valueOf(summary.getTotalEmployees()));
+        addCard("Total Gross Payroll", formatCurrency(summary.getTotalGross()), 0);
+        addCard("Total Net Payroll", formatCurrency(summary.getTotalNet()), 2);
+        addCard("Total Deductions", formatCurrency(summary.getTotalDeductions()), 4);
+        addCard("Employees Paid", String.valueOf(summary.getTotalEmployees()), 1);
     }
 
-    // ================= ADMIN =================
     private void showAdminMetrics() {
         showFinanceMetrics();
     }
 
-    // ================= EMPLOYEE =================
     private void showEmployeeMetrics() {
-
         DashboardSummary summary = dashboardService.generateSummary();
 
-        addCard("My Gross Salary",
-                formatCurrency(user.computeGrossSalary()));
-
-        addCard("My Net Salary",
-                formatCurrency(user.computeNetSalary()));
-
-        addCard("My Allowance",
-                formatCurrency(user.getAllowance()));
-
-        addCard("My Pending Leaves",
-                String.valueOf(summary.getPendingLeaves()));
+        addCard("My Gross Salary", formatCurrency(user.computeGrossSalary()), 0);
+        addCard("My Net Salary", formatCurrency(user.computeNetSalary()), 2);
+        addCard("My Allowance", formatCurrency(user.getAllowance()), 1);
+        addCard("My Pending Leaves", String.valueOf(summary.getPendingLeaves()), 3);
     }
 
-    // ================= CARD CREATION =================
-    private void addCard(String title, String value){
-        cardContainer.add(createCard(title,value));
+    private void addCard(String title, String value, int accentIndex) {
+        cardContainer.add(createCard(
+                title,
+                value,
+                CARD_ACCENTS[accentIndex % CARD_ACCENTS.length]
+        ));
     }
 
-    private JPanel createCard(String title, String value){
+    private JPanel createCard(String title, String value, Color accent) {
+        JPanel card = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(
+                        RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON
+                );
+                g2.setColor(accent);
+                g2.fillRoundRect(0, 0, 4, getHeight(), 2, 2);
+                g2.dispose();
+            }
+        };
 
-        JPanel card = UITheme.createDashboardCard();
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(UITheme.BORDER, 1),
+                new EmptyBorder(22, 24, 22, 20)
+        ));
 
         JLabel lblTitle = new JLabel(title);
-        lblTitle.setFont(new Font("Segoe UI", Font.PLAIN,14));
-        lblTitle.setForeground(new Color(100,100,120));
+        lblTitle.setFont(UITheme.FONT_CARD_LABEL);
+        lblTitle.setForeground(UITheme.TEXT_SECONDARY);
 
         JLabel lblValue = new JLabel(value);
-        lblValue.setFont(new Font("Segoe UI", Font.BOLD,24));
-        lblValue.setForeground(new Color(30,30,40));
-
-        card.setLayout(new BorderLayout());
-        card.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+        lblValue.setFont(UITheme.FONT_CARD_VALUE);
+        lblValue.setForeground(UITheme.TEXT_PRIMARY);
+        lblValue.setBorder(new EmptyBorder(8, 0, 0, 0));
 
         card.add(lblTitle, BorderLayout.NORTH);
         card.add(lblValue, BorderLayout.CENTER);
@@ -206,9 +178,9 @@ public class DashboardPanel extends JPanel {
     }
 
     private String formatCurrency(double value) {
-        NumberFormat peso =
-                NumberFormat.getCurrencyInstance(
-                        new Locale("en","PH"));
+        NumberFormat peso = NumberFormat.getCurrencyInstance(
+                new Locale("en", "PH")
+        );
         return peso.format(value);
     }
 }

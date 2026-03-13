@@ -5,12 +5,16 @@
 package com.mycompany.oop.view;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import com.mycompany.oop.model.Employee;
 import com.mycompany.oop.model.Leave;
 import com.mycompany.oop.service.LeaveService;
+import com.toedter.calendar.JDateChooser;
 
 public class LeavePanel extends JPanel {
 
@@ -24,13 +28,13 @@ public class LeavePanel extends JPanel {
         this.service = new LeaveService();
 
         setLayout(new BorderLayout());
-        setBackground(UITheme.MAIN_GRAY);
+        setBackground(UITheme.BG);
 
         add(UITheme.createTitleBar("File Leave Request"), BorderLayout.NORTH);
 
-        JPanel content = UITheme.createInsetPanel();
-        content.setLayout(new BorderLayout());
-        content.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
+        JPanel content = new JPanel(new BorderLayout());
+        content.setBackground(UITheme.BG);
+        content.setBorder(new EmptyBorder(16, 20, 16, 20));
 
         content.add(createFormPanel(), BorderLayout.NORTH);
         content.add(createTablePanel(), BorderLayout.CENTER);
@@ -38,102 +42,121 @@ public class LeavePanel extends JPanel {
         add(content, BorderLayout.CENTER);
     }
 
-    // ================= FORM =================
     private JPanel createFormPanel() {
 
         JPanel formWrapper = new JPanel(new BorderLayout());
-        formWrapper.setBorder(BorderFactory.createRaisedBevelBorder());
         formWrapper.setBackground(Color.WHITE);
         formWrapper.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createRaisedBevelBorder(),
-                BorderFactory.createEmptyBorder(15,15,15,15)
+                BorderFactory.createLineBorder(UITheme.BORDER),
+                new EmptyBorder(18, 20, 18, 20)
         ));
 
-        JPanel formPanel = new JPanel(new GridLayout(5,2,10,10));
+        JLabel formTitle = new JLabel("New Leave Request");
+        formTitle.setFont(UITheme.FONT_SECTION);
+        formTitle.setForeground(UITheme.TEXT_PRIMARY);
+        formTitle.setBorder(new EmptyBorder(0, 0, 14, 0));
+
+        JPanel formPanel = new JPanel(new GridLayout(4, 2, 12, 10));
         formPanel.setBackground(Color.WHITE);
 
         JComboBox<String> typeBox = new JComboBox<>(
-                new String[]{"Vacation","Sick","Emergency"});
-
-        JTextField startField = new JTextField();
-        JTextField endField = new JTextField();
-        JTextField reasonField = new JTextField();
-
+                new String[]{"Vacation", "Sick", "Emergency"});
         styleField(typeBox);
-        styleField(startField);
-        styleField(endField);
-        styleField(reasonField);
+
+        JDateChooser startChooser = new JDateChooser();
+        startChooser.setDateFormatString("yyyy-MM-dd");
+        startChooser.setDate(new Date());
+        styleDateChooser(startChooser);
+
+        JDateChooser endChooser = new JDateChooser();
+        endChooser.setDateFormatString("yyyy-MM-dd");
+        endChooser.setDate(new Date());
+        styleDateChooser(endChooser);
+
+        JTextField reasonField = new JTextField();
+        styleTextField(reasonField);
 
         formPanel.add(createLabel("Leave Type:"));
         formPanel.add(typeBox);
 
-        formPanel.add(createLabel("Start Date (YYYY-MM-DD):"));
-        formPanel.add(startField);
+        formPanel.add(createLabel("Start Date:"));
+        formPanel.add(startChooser);
 
-        formPanel.add(createLabel("End Date (YYYY-MM-DD):"));
-        formPanel.add(endField);
+        formPanel.add(createLabel("End Date:"));
+        formPanel.add(endChooser);
 
         formPanel.add(createLabel("Reason:"));
         formPanel.add(reasonField);
 
         JButton submitBtn = UITheme.createAccentButton("Submit Leave");
         submitBtn.setFocusable(false);
+        submitBtn.setPreferredSize(new Dimension(140, 36));
 
-        JPanel buttonRow = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel buttonRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 8));
         buttonRow.setBackground(Color.WHITE);
         buttonRow.add(submitBtn);
 
+        formWrapper.add(formTitle, BorderLayout.NORTH);
         formWrapper.add(formPanel, BorderLayout.CENTER);
         formWrapper.add(buttonRow, BorderLayout.SOUTH);
 
-        // ACTION
-        submitBtn.addActionListener(e -> {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
+        submitBtn.addActionListener(e -> {
             try {
+                if (startChooser.getDate() == null || endChooser.getDate() == null) {
+                    JOptionPane.showMessageDialog(this,
+                            "Please select both start and end dates.",
+                            "Missing Date",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                String startDate = sdf.format(startChooser.getDate());
+                String endDate = sdf.format(endChooser.getDate());
 
                 Leave leave = service.fileLeave(
                         employee.getEmployeeId(),
                         typeBox.getSelectedItem().toString(),
-                        startField.getText(),
-                        endField.getText(),
-                        reasonField.getText()
+                        startDate,
+                        endDate,
+                        reasonField.getText().trim()
                 );
 
                 JOptionPane.showMessageDialog(this,
-                        "Leave Filed Successfully.\nStatus: " + leave.getStatus());
+                        "Leave filed successfully.\nStatus: " + leave.getStatus());
 
                 refreshTable();
 
-            } catch (Exception ex) {
+                startChooser.setDate(new Date());
+                endChooser.setDate(new Date());
+                reasonField.setText("");
+                typeBox.setSelectedIndex(0);
 
+            } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         ex.getMessage(),
                         "Error",
                         JOptionPane.ERROR_MESSAGE);
             }
+        });
 
-        });   // closes addActionListener
+        JPanel outerWrapper = new JPanel(new BorderLayout());
+        outerWrapper.setBackground(UITheme.BG);
+        outerWrapper.setBorder(new EmptyBorder(0, 0, 16, 0));
+        outerWrapper.add(formWrapper, BorderLayout.CENTER);
 
-        return formWrapper;
-
+        return outerWrapper;
     }
 
-    // ================= TABLE =================
     private JScrollPane createTablePanel() {
 
         table = new JTable();
-        table.setRowHeight(26);
-        table.setFont(new Font("Tahoma", Font.PLAIN, 12));
-        table.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 12));
-        table.setSelectionBackground(new Color(0,0,128));
-        table.setSelectionForeground(Color.WHITE);
+        UITheme.styleTable(table);
 
         refreshTable();
 
-        JScrollPane scroll = new JScrollPane(table);
-        scroll.setBorder(BorderFactory.createLoweredBevelBorder());
-
-        return scroll;
+        return UITheme.createTableScrollPane(table);
     }
 
     private void refreshTable() {
@@ -142,15 +165,13 @@ public class LeavePanel extends JPanel {
                 service.getLeavesByEmployee(employee.getEmployeeId());
 
         String[] columns = {
-                "Leave ID","Type","Start","End","Reason","Status"
+                "Leave ID", "Type", "Start", "End", "Reason", "Status"
         };
 
         Object[][] data = new Object[leaves.size()][6];
 
         for (int i = 0; i < leaves.size(); i++) {
-
             Leave l = leaves.get(i);
-
             data[i][0] = l.getLeaveId();
             data[i][1] = l.getLeaveType();
             data[i][2] = l.getStartDate();
@@ -169,16 +190,37 @@ public class LeavePanel extends JPanel {
         table.setModel(model);
     }
 
-    // ================= STYLING HELPERS =================
-    private JLabel createLabel(String text){
+    private JLabel createLabel(String text) {
         JLabel lbl = new JLabel(text);
-        lbl.setFont(new Font("Tahoma", Font.BOLD, 12));
+        lbl.setFont(UITheme.FONT_BODY_BOLD);
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
         return lbl;
     }
 
-    private void styleField(JComponent field){
-        field.setFont(new Font("Tahoma", Font.PLAIN, 12));
-        field.setBorder(BorderFactory.createLoweredBevelBorder());
+    private void styleField(JComboBox<String> field) {
+        field.setFont(UITheme.FONT_BODY);
         field.setBackground(Color.WHITE);
+    }
+
+    private void styleTextField(JTextField field) {
+        field.setFont(UITheme.FONT_BODY);
+        field.setBackground(Color.WHITE);
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(UITheme.BORDER),
+                new EmptyBorder(4, 8, 4, 8)
+        ));
+    }
+
+    private void styleDateChooser(JDateChooser chooser) {
+        chooser.setFont(UITheme.FONT_BODY);
+        chooser.setBackground(Color.WHITE);
+
+        JTextField editor = ((JTextField) chooser.getDateEditor().getUiComponent());
+        editor.setFont(UITheme.FONT_BODY);
+        editor.setBackground(Color.WHITE);
+        editor.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(UITheme.BORDER),
+                new EmptyBorder(4, 8, 4, 8)
+        ));
     }
 }

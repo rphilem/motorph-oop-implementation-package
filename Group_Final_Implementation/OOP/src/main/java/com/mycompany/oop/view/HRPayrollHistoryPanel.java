@@ -5,6 +5,7 @@
 package com.mycompany.oop.view;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.text.NumberFormat;
@@ -18,24 +19,39 @@ public class HRPayrollHistoryPanel extends JPanel {
 
     private PayrollService payrollService;
     private JTable table;
+    private boolean canManage;
 
     public HRPayrollHistoryPanel() {
+        this(true);
+    }
 
+    public HRPayrollHistoryPanel(boolean canManage) {
+
+        this.canManage = canManage;
         payrollService = new PayrollService();
 
         setLayout(new BorderLayout());
-        setBackground(UITheme.MAIN_GRAY);
+        setBackground(UITheme.BG);
 
         add(UITheme.createTitleBar("Payroll History (All Employees)"),
                 BorderLayout.NORTH);
 
+        JPanel content = new JPanel(new BorderLayout());
+        content.setBackground(UITheme.BG);
+        content.setBorder(new EmptyBorder(16, 20, 16, 20));
+
         table = new JTable();
-        table.setRowHeight(25);
+        UITheme.styleTable(table);
 
         refreshTable();
 
-        add(new JScrollPane(table), BorderLayout.CENTER);
-        add(createControlPanel(), BorderLayout.SOUTH);
+        content.add(UITheme.createTableScrollPane(table), BorderLayout.CENTER);
+
+        if (canManage) {
+            content.add(createControlPanel(), BorderLayout.SOUTH);
+        }
+
+        add(content, BorderLayout.CENTER);
     }
 
     private void refreshTable() {
@@ -44,20 +60,21 @@ public class HRPayrollHistoryPanel extends JPanel {
                 payrollService.getAllPayrollHistory();
 
         String[] cols = {
-                "Emp ID","Cutoff",
-                "Gross","SSS","PhilHealth",
-                "Pag-IBIG","Tax",
-                "Total Deductions","Net"
+                "Emp ID", "Cutoff",
+                "Gross", "SSS", "PhilHealth",
+                "Pag-IBIG", "Tax",
+                "Total Deductions", "Net"
         };
 
         NumberFormat peso =
                 NumberFormat.getCurrencyInstance(
-                        new Locale("en","PH"));
+                        new Locale("en", "PH")
+                );
 
         Object[][] data =
                 new Object[list.size()][9];
 
-        for(int i=0; i<list.size(); i++){
+        for (int i = 0; i < list.size(); i++) {
 
             PayrollHistoryRecord r = list.get(i);
 
@@ -72,22 +89,23 @@ public class HRPayrollHistoryPanel extends JPanel {
             data[i][8] = peso.format(r.getNet());
         }
 
-        table.setModel(new DefaultTableModel(data, cols){
-            public boolean isCellEditable(int r, int c){
+        table.setModel(new DefaultTableModel(data, cols) {
+            @Override
+            public boolean isCellEditable(int r, int c) {
                 return false;
             }
         });
     }
-    
+
     private JPanel createControlPanel() {
 
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        panel.setBackground(UITheme.MAIN_GRAY);
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
+        panel.setBackground(UITheme.BG);
 
         JButton clearBtn =
                 UITheme.createCrudDangerButton("Clear Cutoff");
 
-        clearBtn.setPreferredSize(new Dimension(140, 32));
+        clearBtn.setPreferredSize(new Dimension(160, 36));
 
         clearBtn.addActionListener(e -> clearSelectedCutoff());
 
@@ -95,42 +113,41 @@ public class HRPayrollHistoryPanel extends JPanel {
 
         return panel;
     }
-    
+
     private void clearSelectedCutoff() {
 
-    int row = table.getSelectedRow();
+        int row = table.getSelectedRow();
 
-    if (row == -1) {
-        JOptionPane.showMessageDialog(
+        if (row == -1) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a payroll record first.",
+                    "No Selection",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        String cutoff =
+                table.getValueAt(row, 1).toString();
+
+        int confirm = JOptionPane.showConfirmDialog(
                 this,
-                "Please select a payroll record first.",
-                "No Selection",
-                JOptionPane.WARNING_MESSAGE
+                "Are you sure you want to clear cutoff:\n" + cutoff + " ?",
+                "Confirm Clear",
+                JOptionPane.YES_NO_OPTION
         );
-        return;
-    }
 
-    String cutoff =
-            table.getValueAt(row, 1).toString();
+        if (confirm == JOptionPane.YES_OPTION) {
 
-    int confirm = JOptionPane.showConfirmDialog(
-            this,
-            "Are you sure you want to clear cutoff:\n" + cutoff + " ?",
-            "Confirm Clear",
-            JOptionPane.YES_NO_OPTION
-    );
+            payrollService.deleteCutoff(cutoff);
 
-    if (confirm == JOptionPane.YES_OPTION) {
-
-        payrollService.deleteCutoff(cutoff);
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Cutoff cleared successfully."
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Cutoff cleared successfully."
             );
 
             refreshTable();
         }
     }
-    
 }

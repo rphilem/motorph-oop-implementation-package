@@ -5,6 +5,7 @@
 package com.mycompany.oop.view;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import com.mycompany.oop.model.Employee;
 import com.mycompany.oop.model.RegularEmployee;
@@ -34,16 +35,20 @@ public class EmployeeFormDialog extends JDialog {
 
         setTitle(employee == null ? "Add Employee" : "Edit Employee");
         setLayout(new BorderLayout());
-        getContentPane().setBackground(UITheme.MAIN_GRAY);
+        getContentPane().setBackground(UITheme.BG);
 
         add(UITheme.createTitleBar(getTitle()), BorderLayout.NORTH);
 
-        JPanel content = UITheme.createInsetPanel();
-        content.setLayout(new BorderLayout());
-        content.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
+        JPanel content = new JPanel(new BorderLayout());
+        content.setBackground(UITheme.BG);
+        content.setBorder(new EmptyBorder(12, 16, 12, 16));
 
-        JPanel formPanel = new JPanel(new GridLayout(0,2,8,6));
+        JPanel formPanel = new JPanel(new GridLayout(0, 2, 10, 8));
         formPanel.setBackground(Color.WHITE);
+        formPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(UITheme.BORDER),
+                new EmptyBorder(16, 16, 16, 16)
+        ));
 
         idField = createField("Employee ID:", formPanel);
         firstNameField = createField("First Name:", formPanel);
@@ -55,7 +60,6 @@ public class EmployeeFormDialog extends JDialog {
         hourlyRateField = createField("Hourly Rate:", formPanel);
 
         if (isAdmin) {
-
             usernameField = createField("Username:", formPanel);
 
             formPanel.add(createLabel("Password:"));
@@ -67,21 +71,26 @@ public class EmployeeFormDialog extends JDialog {
             roleBox = new JComboBox<>(new String[]{
                     "Admin", "HR", "Finance", "Employee", "IT"
             });
-            roleBox.setFont(new Font("Tahoma", Font.PLAIN, 12));
-            roleBox.setBorder(BorderFactory.createLoweredBevelBorder());
+            roleBox.setFont(UITheme.FONT_BODY);
+            roleBox.setBackground(Color.WHITE);
             formPanel.add(roleBox);
         }
 
-        content.add(formPanel, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(formPanel);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(UITheme.BG);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 5));
-        buttonPanel.setBackground(UITheme.MAIN_GRAY);
+        content.add(scrollPane, BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        buttonPanel.setBackground(UITheme.BG);
 
         JButton cancelBtn = UITheme.createFormButton("Cancel");
-        JButton saveBtn = UITheme.createFormButton("Save");
+        JButton saveBtn = UITheme.createAccentButton("Save");
 
-        cancelBtn.setPreferredSize(new Dimension(85, 30));
-        saveBtn.setPreferredSize(new Dimension(85, 30));
+        cancelBtn.setPreferredSize(new Dimension(90, 34));
+        saveBtn.setPreferredSize(new Dimension(90, 34));
 
         cancelBtn.addActionListener(e -> dispose());
         saveBtn.addActionListener(e -> saveEmployee());
@@ -95,42 +104,40 @@ public class EmployeeFormDialog extends JDialog {
 
         if (employee != null) {
             populateFields(employee);
-
-            // Prevent editing employee ID during update
             idField.setEditable(false);
-            idField.setBackground(new Color(230, 230, 230));
+            idField.setBackground(new Color(235, 235, 235));
         }
 
-        pack();
+        setSize(620, 470);
         setLocationRelativeTo(parent);
     }
 
     private JTextField createField(String labelText, JPanel panel) {
-
         panel.add(createLabel(labelText));
-
         JTextField field = new JTextField();
         styleField(field);
         panel.add(field);
-
         return field;
     }
 
-    private JLabel createLabel(String text){
+    private JLabel createLabel(String text) {
         JLabel lbl = new JLabel(text);
-        lbl.setFont(new Font("Tahoma", Font.BOLD, 12));
+        lbl.setFont(UITheme.FONT_BODY_BOLD);
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
         return lbl;
     }
 
-    private void styleField(JTextField field){
-        field.setPreferredSize(new Dimension(180, 28));
-        field.setBorder(BorderFactory.createLoweredBevelBorder());
+    private void styleField(JTextField field) {
+        field.setPreferredSize(new Dimension(180, 30));
+        field.setFont(UITheme.FONT_BODY);
         field.setBackground(Color.WHITE);
-        field.setFont(new Font("Tahoma", Font.PLAIN, 12));
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(UITheme.BORDER),
+                new EmptyBorder(4, 8, 4, 8)
+        ));
     }
 
     private void populateFields(Employee e) {
-
         idField.setText(String.valueOf(e.getEmployeeId()));
         firstNameField.setText(e.getFirstName());
         lastNameField.setText(e.getLastName());
@@ -179,7 +186,6 @@ public class EmployeeFormDialog extends JDialog {
         }
 
         try {
-
             int employeeId = Integer.parseInt(idField.getText().trim());
 
             if (existingEmployee == null && service.findById(employeeId) != null) {

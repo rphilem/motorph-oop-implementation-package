@@ -5,6 +5,7 @@
 package com.mycompany.oop.view;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
@@ -20,18 +21,27 @@ public class ITPanel extends JPanel {
     private JPanel cardsPanel;
     private JPanel content;
 
+    private static final Color[] METRIC_ACCENTS = {
+            new Color(210, 43, 43),
+            new Color(37, 99, 195),
+            new Color(59, 130, 246),
+            new Color(34, 160, 70),
+            new Color(185, 30, 30),
+            new Color(130, 80, 210)
+    };
+
     public ITPanel() {
 
         service = new EmployeeService();
 
         setLayout(new BorderLayout());
-        setBackground(UITheme.MAIN_GRAY);
+        setBackground(UITheme.BG);
 
         add(UITheme.createTitleBar("System Administration"), BorderLayout.NORTH);
 
-        content = UITheme.createInsetPanel();
-        content.setLayout(new BorderLayout());
-        content.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
+        content = new JPanel(new BorderLayout());
+        content.setBackground(UITheme.BG);
+        content.setBorder(new EmptyBorder(16, 20, 16, 20));
 
         cardsPanel = createDashboardCards();
 
@@ -42,14 +52,13 @@ public class ITPanel extends JPanel {
         add(content, BorderLayout.CENTER);
     }
 
-    // ================= DASHBOARD METRICS =================
     private JPanel createDashboardCards() {
 
-        JPanel panel = new JPanel(new GridLayout(2,3,15,15));
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createEmptyBorder(10,10,20,10));
+        JPanel panel = new JPanel(new GridLayout(2, 3, 14, 14));
+        panel.setBackground(UITheme.BG);
+        panel.setBorder(new EmptyBorder(0, 0, 16, 0));
 
-        Map<String,Integer> counts = service.getUserRoleCounts();
+        Map<String, Integer> counts = service.getUserRoleCounts();
 
         int total = service.getTotalUsers();
         int admin = counts.getOrDefault("Admin", 0);
@@ -58,29 +67,45 @@ public class ITPanel extends JPanel {
         int employee = counts.getOrDefault("Employee", 0);
         int it = counts.getOrDefault("IT", 0);
 
-        panel.add(createCard("Total Users", total));
-        panel.add(createCard("Admins", admin));
-        panel.add(createCard("HR Users", hr));
-        panel.add(createCard("Finance Users", finance));
-        panel.add(createCard("Employees", employee));
-        panel.add(createCard("IT Users", it));
+        panel.add(createCard("Total Users", total, 0));
+        panel.add(createCard("Admins", admin, 1));
+        panel.add(createCard("HR Users", hr, 2));
+        panel.add(createCard("Finance Users", finance, 3));
+        panel.add(createCard("Employees", employee, 4));
+        panel.add(createCard("IT Users", it, 5));
 
         return panel;
     }
 
-    private JPanel createCard(String title, int value) {
+    private JPanel createCard(String title, int value, int accentIndex) {
 
-        JPanel card = new JPanel(new BorderLayout());
+        Color accent = METRIC_ACCENTS[accentIndex % METRIC_ACCENTS.length];
+
+        JPanel card = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setColor(accent);
+                g2.fillRect(0, 0, getWidth(), 3);
+                g2.dispose();
+            }
+        };
+
         card.setBackground(Color.WHITE);
-        card.setBorder(BorderFactory.createRaisedBevelBorder());
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(UITheme.BORDER, 1),
+                new EmptyBorder(16, 18, 14, 18)
+        ));
 
-        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10,5,5,5));
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(UITheme.FONT_CARD_LABEL);
+        titleLabel.setForeground(UITheme.TEXT_SECONDARY);
 
-        JLabel valueLabel = new JLabel(String.valueOf(value), SwingConstants.CENTER);
-        valueLabel.setFont(new Font("Tahoma", Font.BOLD, 22));
-        valueLabel.setBorder(BorderFactory.createEmptyBorder(5,5,10,5));
+        JLabel valueLabel = new JLabel(String.valueOf(value));
+        valueLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        valueLabel.setForeground(UITheme.TEXT_PRIMARY);
+        valueLabel.setBorder(new EmptyBorder(6, 0, 0, 0));
 
         card.add(titleLabel, BorderLayout.NORTH);
         card.add(valueLabel, BorderLayout.CENTER);
@@ -88,41 +113,25 @@ public class ITPanel extends JPanel {
         return card;
     }
 
-    // ================= USER TABLE =================
     private JScrollPane createUserTable() {
 
         table = new JTable();
-        table.setRowHeight(26);
-        table.setFont(new Font("Tahoma", Font.PLAIN, 12));
-        table.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 12));
-        table.setSelectionBackground(new Color(0,0,128));
-        table.setSelectionForeground(Color.WHITE);
+        UITheme.styleTable(table);
 
         refreshTable();
 
-        JScrollPane scroll = new JScrollPane(table);
-        scroll.setBorder(BorderFactory.createLoweredBevelBorder());
-
-        return scroll;
+        return UITheme.createTableScrollPane(table);
     }
 
     private void refreshTable() {
 
         List<Employee> list = service.getAllEmployees();
 
-        String[] columns = {
-                "Employee ID",
-                "Username",
-                "Role",
-                "Status"
-        };
-
+        String[] columns = {"Employee ID", "Username", "Role", "Status"};
         Object[][] data = new Object[list.size()][4];
 
         for (int i = 0; i < list.size(); i++) {
-
             Employee e = list.get(i);
-
             data[i][0] = e.getEmployeeId();
             data[i][1] = e.getUsername();
             data[i][2] = e.getRole();
@@ -150,17 +159,16 @@ public class ITPanel extends JPanel {
         content.repaint();
     }
 
-    // ================= BUTTONS =================
     private JPanel createButtonPanel() {
 
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT,10,10));
-        panel.setBackground(UITheme.MAIN_GRAY);
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
+        panel.setBackground(UITheme.BG);
 
         JButton resetBtn = UITheme.createButton("Reset Password");
         JButton roleBtn = UITheme.createAccentButton("Change Role");
 
-        resetBtn.setPreferredSize(new Dimension(130,32));
-        roleBtn.setPreferredSize(new Dimension(120,32));
+        resetBtn.setPreferredSize(new Dimension(160, 36));
+        roleBtn.setPreferredSize(new Dimension(160, 36));
 
         resetBtn.addActionListener(e -> resetPassword());
         roleBtn.addActionListener(e -> changeRole());
@@ -176,7 +184,7 @@ public class ITPanel extends JPanel {
         int row = table.getSelectedRow();
         if (row == -1) return;
 
-        int id = Integer.parseInt(table.getValueAt(row,0).toString());
+        int id = Integer.parseInt(table.getValueAt(row, 0).toString());
 
         String newPass = JOptionPane.showInputDialog(
                 this,
@@ -194,7 +202,7 @@ public class ITPanel extends JPanel {
         int row = table.getSelectedRow();
         if (row == -1) return;
 
-        int id = Integer.parseInt(table.getValueAt(row,0).toString());
+        int id = Integer.parseInt(table.getValueAt(row, 0).toString());
 
         String newRole = (String) JOptionPane.showInputDialog(
                 this,
@@ -202,7 +210,7 @@ public class ITPanel extends JPanel {
                 "Change Role",
                 JOptionPane.PLAIN_MESSAGE,
                 null,
-                new String[]{"Admin","HR","Finance","Employee","IT"},
+                new String[]{"Admin", "HR", "Finance", "Employee", "IT"},
                 "Employee"
         );
 
